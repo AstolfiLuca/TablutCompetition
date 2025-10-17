@@ -53,3 +53,8 @@ dkms.conf
 
 #IDE metadata
 **.idea/**
+
+Tablut/build/
+Tablut/bin/
+Tablut/garbage/
+Tablut/logs/
