@@ -61,4 +61,3 @@ Example:
 ```
 java -jar .\server.jar -g -R .\logs\PLAYER1_vs_PLAYER2_1652711382324_gameLog.txt
 ```
-

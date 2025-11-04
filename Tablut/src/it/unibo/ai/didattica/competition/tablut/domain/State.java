@@ -76,6 +76,18 @@ public abstract class State {
 			return pawn;
 		}
 
+		public boolean belongsTo(Turn turn) {
+			switch (this) {
+				case WHITE:
+				case KING:
+					return turn == Turn.WHITE;
+				case BLACK:
+					return turn == Turn.BLACK;
+				default:
+					return false;
+			}
+		}
+
 	}
 
 	protected Pawn board[][];
