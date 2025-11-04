@@ -169,7 +169,6 @@ public class GameAshtonTablut implements Game, aima.core.search.adversarial.Game
 		this.loggGame.fine("Current draw cache size: " + this.drawConditions.size());
 
 		this.loggGame.fine("Stato:\n" + state.toString());
-		System.out.println("Stato:\n" + state.toString());
 
 		return state;
 	}
@@ -913,8 +912,9 @@ public class GameAshtonTablut implements Game, aima.core.search.adversarial.Game
 	@Override
 	public State getResult(State state, Action action) {
 		State newState = null;
+
 		try{
-			newState = this.checkMove(state, action);
+			newState = this.checkMove(state.clone(), action);
 		} catch (Exception e){
 
 		}
