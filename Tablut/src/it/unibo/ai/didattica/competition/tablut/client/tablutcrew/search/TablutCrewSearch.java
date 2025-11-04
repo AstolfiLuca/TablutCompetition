@@ -13,12 +13,11 @@ public class TablutCrewSearch extends IterativeDeepeningAlphaBetaSearch<State, A
 
     @Override
     protected double eval(State state, State.Turn player) {
-        double result = super.eval(state, player);
-        if (game.isTerminal(state)) {
-            return result;
-        }
+        // Needed to make heuristicEvaluationUsed = true, if the state evaluated isn't terminal
+        super.eval(state, player);
 
-        return simpleHeuristicEvaluation(state, player);
+        // Return heuristic value for the given state
+        return game.getUtility(state, player);
     }
 
 

@@ -12,6 +12,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
+import it.unibo.ai.didattica.competition.tablut.client.tablutcrew.heuristics.BlackHeuristics;
+import it.unibo.ai.didattica.competition.tablut.client.tablutcrew.heuristics.Heuristics;
+import it.unibo.ai.didattica.competition.tablut.client.tablutcrew.heuristics.WhiteHeuristics;
 import it.unibo.ai.didattica.competition.tablut.exceptions.*;
 
 /**
@@ -24,6 +27,8 @@ import it.unibo.ai.didattica.competition.tablut.exceptions.*;
  */
 public class GameAshtonTablut implements Game, aima.core.search.adversarial.Game<State, Action, State.Turn> {
 
+	public final static int NUM_BLACK = 16;
+	public final static int NUM_WHITE = 8;
 	/**
 	 * Number of repeated states that can occur before a draw
 	 */
@@ -938,14 +943,17 @@ public class GameAshtonTablut implements Game, aima.core.search.adversarial.Game
 	 */
 	@Override
 	public double getUtility(State state, State.Turn turn) {
-		if ((turn == State.Turn.WHITEWIN && state.getTurn().equals(State.Turn.WHITE)) ||
-		(turn == State.Turn.BLACKWIN && state.getTurn().equals(State.Turn.BLACK)))
-			return Double.POSITIVE_INFINITY;
-		else if ((turn == State.Turn.WHITEWIN && state.getTurn().equals(State.Turn.BLACK)) ||
-		(turn == State.Turn.BLACKWIN && state.getTurn().equals(State.Turn.WHITE)))
-			return Double.NEGATIVE_INFINITY;
-		else
-			return 0;
+		// Terminal state
+		if ((turn.equals(State.Turn.BLACK) && state.getTurn().equals(State.Turn.BLACKWIN))
+				|| (turn.equals(State.Turn.WHITE) && state.getTurn().equals(State.Turn.WHITEWIN)))
+			return Double.POSITIVE_INFINITY; // Win
+		else if ((turn.equals(State.Turn.BLACK) && state.getTurn().equals(State.Turn.WHITEWIN))
+				|| (turn.equals(State.Turn.WHITE) && state.getTurn().equals(State.Turn.BLACKWIN)))
+			return Double.NEGATIVE_INFINITY; // Lose
+
+		// Non-terminal state => get Heuristics for the current state
+		Heuristics heuristics = turn.equals(State.Turn.WHITE) ? new WhiteHeuristics(state) : new BlackHeuristics(state);
+		return heuristics.evaluateState();
 	}
 
 	@Override
