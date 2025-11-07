@@ -1,4 +1,4 @@
-package it.unibo.ai.didattica.competition.tablut.client.tablutcrew.heuristics;
+package it.unibo.ai.didattica.competition.tablut.client.tablutcrew.heuristics.tavoletta;
 
 import it.unibo.ai.didattica.competition.tablut.domain.GameAshtonTablut;
 import it.unibo.ai.didattica.competition.tablut.domain.State;
@@ -31,7 +31,7 @@ import java.util.Arrays;
  *
  * @author Gionnino9000
  */
-public class BlackHeuristics extends Heuristics {
+public class BlackTavolettaHeuristics extends TavolettaHeuristics {
 
     private final int WHITE_EATEN = 0; // White pawns already eaten
     private final int BLACK_ALIVE = 1; // Black pawns still alive
@@ -59,7 +59,7 @@ public class BlackHeuristics extends Heuristics {
                   {7,2},       {7,6}
     };
 
-    public BlackHeuristics(State state) {
+    public BlackTavolettaHeuristics(State state) {
         super(state);
 
         earlyGameWeights = new Double[4];
@@ -80,19 +80,19 @@ public class BlackHeuristics extends Heuristics {
      */
     @Override
     public double evaluateState() {
-        int[] kingPos = kingPosition(state);
+        int[] kingPos = kingPosition(this.state);
 
         double stateValue = 0.0;
         boolean lateGame = false;
 
-        int numbOfWhite = state.getNumberOf(State.Pawn.WHITE);
+        int numbOfWhite = this.state.getNumberOf(State.Pawn.WHITE);
         if (numbOfWhite <= 4)
             lateGame = true;
 
         // Values for the weighted sum
-        double numberOfBlackAlive = (double) state.getNumberOf(State.Pawn.BLACK) / GameAshtonTablut.NUM_BLACK;
+        double numberOfBlackAlive = (double) this.state.getNumberOf(State.Pawn.BLACK) / GameAshtonTablut.NUM_BLACK;
         double numberOfWhiteEaten = (double) (GameAshtonTablut.NUM_WHITE - numbOfWhite) / GameAshtonTablut.NUM_WHITE;
-        double surroundKing = (double) checkAdjacentPawns(state, kingPos, State.Turn.BLACK.toString()) / getNumbToEatKing(state);
+        double surroundKing = (double) checkAdjacentPawns(this.state, kingPos, State.Turn.BLACK.toString()) / getNumbToEatKing(this.state);
 
         double whiteInDanger = getPawnsAggression();
         if (whiteInDanger > 0)

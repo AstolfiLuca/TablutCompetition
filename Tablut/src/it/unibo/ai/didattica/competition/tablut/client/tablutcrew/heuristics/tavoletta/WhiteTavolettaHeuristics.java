@@ -1,4 +1,4 @@
-package it.unibo.ai.didattica.competition.tablut.client.tablutcrew.heuristics;
+package it.unibo.ai.didattica.competition.tablut.client.tablutcrew.heuristics.tavoletta;
 
 import it.unibo.ai.didattica.competition.tablut.domain.GameAshtonTablut;
 import it.unibo.ai.didattica.competition.tablut.domain.State;
@@ -19,7 +19,7 @@ import java.util.Arrays;
  *
  * @author Gionnino9000
  */
-public class WhiteHeuristics extends Heuristics{
+public class WhiteTavolettaHeuristics extends TavolettaHeuristics {
 
     private final int WHITE_ALIVE = 0; // White pawns still alive
     private final int BLACK_EATEN = 1; // Black pawns eaten
@@ -31,7 +31,7 @@ public class WhiteHeuristics extends Heuristics{
 
     private final Double[] gameWeights;
 
-    public WhiteHeuristics(State state) {
+    public WhiteTavolettaHeuristics(State state) {
         super(state);
 
         gameWeights = new Double[4];
@@ -49,14 +49,14 @@ public class WhiteHeuristics extends Heuristics{
     public double evaluateState() {
         double stateValue = 0.0;
 
-        int[] kingPos = kingPosition(state);
+        int[] kingPos = kingPosition(this.state);
 
         // If king can be captured PRUNE THOSE MFS
-        if (canBeCaptured(state, kingPos, State.Pawn.KING))
+        if (canBeCaptured(this.state, kingPos, State.Pawn.KING))
             return Double.NEGATIVE_INFINITY;
 
-        int numbOfBlack = state.getNumberOf(State.Pawn.BLACK);
-        int numbOfWhite = state.getNumberOf(State.Pawn.WHITE);
+        int numbOfBlack = this.state.getNumberOf(State.Pawn.BLACK);
+        int numbOfWhite = this.state.getNumberOf(State.Pawn.WHITE);
         // Values for the weighted sum
         double numberOfWhiteAlive = (double)  numbOfWhite / GameAshtonTablut.NUM_WHITE;
         double numberOfBlackEaten = (double)  (GameAshtonTablut.NUM_BLACK - numbOfBlack) / GameAshtonTablut.NUM_BLACK;

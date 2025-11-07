@@ -1,5 +1,6 @@
-package it.unibo.ai.didattica.competition.tablut.client.tablutcrew.heuristics;
+package it.unibo.ai.didattica.competition.tablut.client.tablutcrew.heuristics.tavoletta;
 
+import it.unibo.ai.didattica.competition.tablut.client.tablutcrew.heuristics.Heuristic;
 import it.unibo.ai.didattica.competition.tablut.domain.State;
 
 import java.util.ArrayList;
@@ -7,7 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 
 
-public abstract class Heuristics {
+public abstract class TavolettaHeuristics implements Heuristic {
 
     protected State state;
 
@@ -24,10 +25,11 @@ public abstract class Heuristics {
                         {8,3}, {8,4}, {8,5},
     };
 
-    public Heuristics(State state) {
+    public TavolettaHeuristics(State state) {
         this.state = state;
     }
 
+    @Override
     public double evaluateState() {
         return 0;
     }
