@@ -1,4 +1,4 @@
-package it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients;
+package it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.baseline;
 
 import java.io.IOException;
 

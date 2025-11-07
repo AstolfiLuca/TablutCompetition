@@ -1,4 +1,4 @@
-package it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients;
+package it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.baseline;
 
 import it.unibo.ai.didattica.competition.tablut.client.TablutClient;
 import it.unibo.ai.didattica.competition.tablut.client.tablutcrew.search.TablutCrewSearch;
@@ -6,13 +6,11 @@ import it.unibo.ai.didattica.competition.tablut.domain.Action;
 import it.unibo.ai.didattica.competition.tablut.domain.GameAshtonTablut;
 import it.unibo.ai.didattica.competition.tablut.domain.State;
 import it.unibo.ai.didattica.competition.tablut.domain.StateTablut;
-import it.unibo.ai.didattica.competition.tablut.util.StreamUtils;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class TablutCrew extends TablutClient {
     public final static String CLIENT_NAME = "TablutCrew";
