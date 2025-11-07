@@ -8,6 +8,6 @@ public class WhiteTablutCrew {
         if (args.length>0){
             array = new String[]{"WHITE", args[0]};
         }
-        TablutCrew.main(array);;
+        TablutCrew.main(array);//todo è possibile che non gli stiamo passando il timer??
     }
 }
