@@ -12,9 +12,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
-import it.unibo.ai.didattica.competition.tablut.client.tablutcrew.heuristics.BlackHeuristics;
-import it.unibo.ai.didattica.competition.tablut.client.tablutcrew.heuristics.Heuristics;
-import it.unibo.ai.didattica.competition.tablut.client.tablutcrew.heuristics.WhiteHeuristics;
 import it.unibo.ai.didattica.competition.tablut.exceptions.*;
 
 /**
@@ -951,9 +948,8 @@ public class GameAshtonTablut implements Game, aima.core.search.adversarial.Game
 				|| (turn.equals(State.Turn.WHITE) && state.getTurn().equals(State.Turn.BLACKWIN)))
 			return Double.NEGATIVE_INFINITY; // Lose
 
-		// Non-terminal state => get Heuristics for the current state
-		Heuristics heuristics = turn.equals(State.Turn.WHITE) ? new WhiteHeuristics(state) : new BlackHeuristics(state);
-		return heuristics.evaluateState();
+		// Non-terminal state => the evaluation of the state should be handled externally as done in TablutCrewSearch class
+		return 0;
 	}
 
 	@Override
