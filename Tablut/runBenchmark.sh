@@ -18,7 +18,7 @@ OUTPUT_CLASS_LIST="${TARGET_DIR}/player_classes_list.txt"
 #Nel file build.xml di ant devono essere specificate le librerie usate dal progetto
 JAR_COMMAND="uber-jar"
 echo "Launching Ant Command $JAR_COMMAND"
-ant $JAR_COMMAND
+ant $JAR_COMMAND #TODO tightly coupled con ant, si può separare la logica passandogli argomenti in input
 
 echo "Uber jar created"
 echo "Cleaning target files..."
@@ -51,6 +51,38 @@ done
 COUNT=$(wc -l < "$OUTPUT_CLASS_LIST")
 echo "Search complete"
 echo "Found ${COUNT} Player classes. List saved in: $OUTPUT_CLASS_LIST"
+
+
+#------------------------------------------------------------------
+
+MAIN_JAR="./target/tablut_benchmark_jar.jar"
+SERVER_CLASS="it.unibo.ai.didattica.competition.tablut.server.Server"
+SERVER_PARAMETERS="-g -t 2000"
+LOGS_FOLDER="${TARGET_DIR}/logs"
+
+mkdir "$LOGS_FOLDER"
+
+touch "${LOGS_FOLDER}/server.logs"
+echo "Starting server"
+java -cp $MAIN_JAR $SERVER_CLASS $SERVER_PARAMETERS >> "${LOGS_FOLDER}/server.logs" 2>&1 &
+# Cattura i PID visibili da git bash (importante per controlli/kill)
+SERVER_PID=$!
+echo "Server launched with parameters $SERVER_PARAMETERS and PID: $SERVER_PID."
+sleep 1
+
+java -cp $MAIN_JAR "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.baseline.BaselineWhitePlayer"  >> "${LOGS_FOLDER}/white_stout.logs" 2>&1 &
+WHITE_PID=$!
+echo "White avviato con PID: $WHITE_PID."
+sleep 1
+
+java -cp "$MAIN_JAR" "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.tavoletta.TavolettaBlackPlayer">> "${LOGS_FOLDER}/black_stdout.logs" 2>&1 &
+BLACK_PID=$!
+echo "Black avviato con PID: $BLACK_PID."
+sleep 1
+
+
+
+
 
 
 
