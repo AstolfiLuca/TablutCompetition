@@ -23,7 +23,7 @@ import java.net.UnknownHostException;
  * (<a href="https://github.com/Federicoand98">Federico Andrucci</a>, <a href="https://github.com/TryKatChup">Karina Chichifoi</a>,
  * <a href="https://github.com/Noesh">Alex Gianelli</a>, <a href="https://github.com/mikyll">Michele Righi</a>)
  */
-public class Tavoletta extends TablutClient {
+public class TavolettaPlayer extends TablutClient {
     public static final String TEAM_NAME = "Gionnino9000";
     public static final String PLAYER_NAME = "Tavoletta";
 
@@ -43,12 +43,12 @@ public class Tavoletta extends TablutClient {
      * @throws UnknownHostException if the IP address of the host could not be determined.
      * @throws IOException if an I/O error occurs when creating the socket.
      */
-    public Tavoletta(String player, String name, int timeout, String ipAddress, int game, boolean debug) throws UnknownHostException, IOException {
+    public TavolettaPlayer(String player, String name, int timeout, String ipAddress, int game, boolean debug) throws UnknownHostException, IOException {
         super(player, name, timeout, ipAddress);
         this.game = game;
         this.debug = debug;
     }
-    public Tavoletta(String player) throws IOException {
+    public TavolettaPlayer(String player) throws IOException {
         super(player, TEAM_NAME, 60, "localhost");
         this.game = 4;
         this.debug = false;
@@ -118,7 +118,7 @@ public class Tavoletta extends TablutClient {
         System.out.println("Server:  " + ip);
         System.out.println("Debug:   " + deb + "\n");
 
-        Tavoletta client = new Tavoletta(role, PLAYER_NAME + " (Team " + TEAM_NAME + ")", timeout, ip, gameType, deb);
+        TavolettaPlayer client = new TavolettaPlayer(role, PLAYER_NAME + " (Team " + TEAM_NAME + ")", timeout, ip, gameType, deb);
         client.run();
     }
 

@@ -3,7 +3,7 @@ package it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.tavol
 import java.io.IOException;
 import java.net.UnknownHostException;
 
-public class BlackTavoletta {
+public class TavolettaBlackPlayer {
 
     public static void main(String[] args) throws UnknownHostException, ClassNotFoundException, IOException {
         String[] arguments = new String[]{"BLACK", "60", "localhost", "debug"};
@@ -12,6 +12,6 @@ public class BlackTavoletta {
             arguments = new String[]{"BLACK", args[0]};
         }
 
-        Tavoletta.main(arguments);
+        TavolettaPlayer.main(arguments);
     }
 }

@@ -12,7 +12,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TablutCrew extends TablutClient {
+public class BaselinePlayer extends TablutClient {
     public final static String CLIENT_NAME = "TablutCrew";
     public final static String TEAM_NAME = "TablutCrew Team";
     // If the same state of the game is reached twice, draw
@@ -22,19 +22,19 @@ public class TablutCrew extends TablutClient {
 
 
 
-    public TablutCrew(String player, String name, int timeout, String ipAddress) throws UnknownHostException, IOException {
+    public BaselinePlayer(String player, String name, int timeout, String ipAddress) throws UnknownHostException, IOException {
         super(player, name, timeout, ipAddress);
     }
 
-    public TablutCrew(String player, String name, int timeout) throws UnknownHostException, IOException {
+    public BaselinePlayer(String player, String name, int timeout) throws UnknownHostException, IOException {
         super(player, name, timeout);
     }
 
-    public TablutCrew(String player, String name) throws UnknownHostException, IOException {
+    public BaselinePlayer(String player, String name) throws UnknownHostException, IOException {
         super(player, name);
     }
 
-    public TablutCrew(String player, String name, String ipAddress) throws UnknownHostException, IOException {
+    public BaselinePlayer(String player, String name, String ipAddress) throws UnknownHostException, IOException {
         super(player, name, ipAddress);
     }
 
@@ -60,7 +60,7 @@ public class TablutCrew extends TablutClient {
         }
         System.out.println("Selected client: " + args[0]);
 
-        TablutCrew client = new TablutCrew(role, name, timeout, ipAddress);
+        BaselinePlayer client = new BaselinePlayer(role, name, timeout, ipAddress);
         client.run();
     }
 

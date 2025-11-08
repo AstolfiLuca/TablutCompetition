@@ -5,6 +5,7 @@
 
     <target name="clean">
         <delete dir="build"/>
+        <delete dir="target"/>
     </target>
 
     <target name="compile">
@@ -125,6 +126,61 @@
                 <pathelement location="build"/>
             </classpath>
         </java>
+    </target>
+
+    <target name="check-java-version">
+        <echo message="Checking Java Version..."/>
+
+        <condition property="isJava8">
+            <equals arg1="${ant.java.version}" arg2="1.8"/>
+        </condition>
+
+        <fail message="ERROR: You must launch this build with Java 8 (1.8). Used instead: ${java.version}"
+              unless="isJava8"/>
+
+        <echo message="Java 1.8 confirmed."/>
+    </target>
+
+    <property name="src.dir" location="src"/>
+    <property name="lib.dir" location="lib"/>
+    <property name="dest.dir" location="target"/>
+    <property name="dest.lib.dir" location="${dest.dir}/libs"/>
+    <property name="dest.lib.filename" value="libs"/>
+    <property name="final.jar.name" value="tablut_player"/>
+    <property name="output.class.list" value="player_classes.txt"/>
+
+    <path id="project.classpath">
+        <fileset dir="${lib.dir}">
+            <include name="**/*.jar"/>
+        </fileset>
+    </path>
+
+
+    <!-- Group all dependencies into a big dependency-all.jar -->
+    <target name="copy-dependencies">
+
+        <mkdir dir="${dest.lib.dir}" />
+
+        <jar jarfile="${dest.lib.dir}/${dest.lib.filename}.jar">
+            <zipgroupfileset dir="${lib.dir}">
+                <include name="**/*.jar" />
+            </zipgroupfileset>
+        </jar>
+
+    </target>
+
+    <!-- jar it, extract above dependency-all.jar and zip it with project files -->
+    <target name="uber-jar" depends="check-java-version, clean, compile, copy-dependencies"
+            description="package, output to JAR">
+
+        <mkdir dir="${dest.dir}" />
+        <mkdir dir="${dest.lib.dir}" />
+
+        <jar jarfile="${dest.dir}/${final.jar.name}.jar" basedir="${src.dir}">
+            <zipfileset src="${dest.lib.dir}/${dest.lib.filename}.jar"
+                        excludes="META-INF/*.SF" />
+        </jar>
+
     </target>
 
 
