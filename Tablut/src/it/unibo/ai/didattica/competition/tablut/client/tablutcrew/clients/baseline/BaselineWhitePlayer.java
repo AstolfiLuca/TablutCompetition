@@ -8,6 +8,6 @@ public class BaselineWhitePlayer {
         if (args.length>0){
             array = new String[]{"WHITE", args[0]};
         }
-        BaselinePlayer.main(array);//todo è possibile che non gli stiamo passando il timer??
+        BaselinePlayer.main(array);//todo è possibile che non gli stiamo passando l'ip del server??
     }
 }
