@@ -72,12 +72,12 @@ sleep 1
 
 java -cp $MAIN_JAR "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.baseline.BaselineWhitePlayer"  >> "${LOGS_FOLDER}/white_stout.logs" 2>&1 &
 WHITE_PID=$!
-echo "White avviato con PID: $WHITE_PID."
+echo "White launched with PID: $WHITE_PID."
 sleep 1
 
 java -cp "$MAIN_JAR" "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.tavoletta.TavolettaBlackPlayer">> "${LOGS_FOLDER}/black_stdout.logs" 2>&1 &
 BLACK_PID=$!
-echo "Black avviato con PID: $BLACK_PID."
+echo "Black launched with PID: $BLACK_PID."
 sleep 1
 
 
