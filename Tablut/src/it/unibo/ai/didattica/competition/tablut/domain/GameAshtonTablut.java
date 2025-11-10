@@ -136,9 +136,6 @@ public class GameAshtonTablut implements Game, aima.core.search.adversarial.Game
 		// controllo pareggio
 		int trovati = 0;
 		for (State s : drawConditions) {
-
-			System.out.println(s.toString());
-
 			if (s.equals(state)) {
 				// DEBUG: //
 				// System.out.println("UGUALI:");
@@ -947,6 +944,8 @@ public class GameAshtonTablut implements Game, aima.core.search.adversarial.Game
 		else if ((turn.equals(State.Turn.BLACK) && state.getTurn().equals(State.Turn.WHITEWIN))
 				|| (turn.equals(State.Turn.WHITE) && state.getTurn().equals(State.Turn.BLACKWIN)))
 			return Double.NEGATIVE_INFINITY; // Lose
+		else if (state.getTurn().equals(State.Turn.DRAW))
+			return 0; // DRAW
 
 		// Non-terminal state => the evaluation of the state should be handled externally as done in TablutCrewSearch class
 		return 0;
