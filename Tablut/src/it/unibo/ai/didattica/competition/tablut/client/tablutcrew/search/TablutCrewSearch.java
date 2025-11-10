@@ -3,8 +3,8 @@ package it.unibo.ai.didattica.competition.tablut.client.tablutcrew.search;
 import aima.core.search.adversarial.Game;
 import aima.core.search.adversarial.IterativeDeepeningAlphaBetaSearch;
 import it.unibo.ai.didattica.competition.tablut.client.tablutcrew.heuristics.Heuristic;
-import it.unibo.ai.didattica.competition.tablut.client.tablutcrew.heuristics.baseline.BlackHeuristics;
-import it.unibo.ai.didattica.competition.tablut.client.tablutcrew.heuristics.baseline.WhiteHeuristics;
+import it.unibo.ai.didattica.competition.tablut.client.tablutcrew.heuristics.baseline.BlackBaselineHeuristics;
+import it.unibo.ai.didattica.competition.tablut.client.tablutcrew.heuristics.baseline.WhiteBaselineHeuristics;
 import it.unibo.ai.didattica.competition.tablut.domain.Action;
 import it.unibo.ai.didattica.competition.tablut.domain.State;
 
@@ -21,7 +21,7 @@ public class TablutCrewSearch extends IterativeDeepeningAlphaBetaSearch<State, A
             return result;
         }
 
-        Heuristic heuristics = player.equals(State.Turn.WHITE) ? new WhiteHeuristics(state) : new BlackHeuristics(state);
+        Heuristic heuristics = player.equals(State.Turn.WHITE) ? new WhiteBaselineHeuristics(state) : new BlackBaselineHeuristics(state);
         // Return heuristic value for the given state
         return heuristics.evaluateState();
     }

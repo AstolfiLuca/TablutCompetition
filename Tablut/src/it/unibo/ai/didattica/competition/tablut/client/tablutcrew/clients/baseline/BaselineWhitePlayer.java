@@ -2,12 +2,12 @@ package it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.basel
 
 import java.io.IOException;
 
-public class BlackTablutCrew {
+public class BaselineWhitePlayer {
     public static void main(String[] args) throws ClassNotFoundException, IOException {
-        String[] array = new String[]{"BLACK"};
+        String[] array = new String[]{"WHITE"};
         if (args.length>0){
-            array = new String[]{"BLACK", args[0]};
+            array = new String[]{"WHITE", args[0]};
         }
-        TablutCrew.main(array);
+        BaselinePlayer.main(array);;
     }
 }
