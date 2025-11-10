@@ -16,6 +16,7 @@ public class TablutCrewSearch extends IterativeDeepeningAlphaBetaSearch<State, A
     @Override
     protected double eval(State state, State.Turn player){
         // Compute the state value and set heuristicsEnabled
+        //we call the eval method from the superclass because this sets to true the flag heuristicEvaluationUsed
         double result = super.eval(state, player);
         if (game.isTerminal(state)) {
             return result;
