@@ -3,11 +3,18 @@ package it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.basel
 import java.io.IOException;
 
 public class BaselineBlackPlayer {
+
+    /*
+     * Ogni player dovrà prendere in input questi argomenti
+     * RUOLO TIMEOUT IPSERVER NOME
+     * */
     public static void main(String[] args) throws ClassNotFoundException, IOException {
-        String[] array = new String[]{"BLACK"};
-        if (args.length>0){
-            array = new String[]{"BLACK", args[0]};
+        String[] arguments = new String[]{"BLACK", "60", "localhost", "BaselinePlayer"};
+
+        if (args.length > 0) {
+            arguments = new String[]{"BLACK", args[1], args[2], args[3]};
         }
-        BaselinePlayer.main(array);//todo è possibile che non gli stiamo passando l'ip del server??
+
+        BaselinePlayer.main(arguments);
     }
 }

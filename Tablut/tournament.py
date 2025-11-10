@@ -29,7 +29,7 @@ def run_server():
               SERVER_CLASS
           ] + SERVER_PARAMETERS # Aggiunge i parametri alla fine
 
-    print(f"Avvio del server... Log su: {log_file_path}")
+    print(f"Avvio del server... Log su: {log_file_path}") #TODO ATTENZIONE, IL FILE DI LOG CRESCE CON OGNI PARTITA
 
     try:
         # 4. Apri il file di log in modalità 'append' ('a')
@@ -50,8 +50,9 @@ def run_server():
         print("ERRORE: Comando 'java' non trovato. Assicurati che sia nel PATH di sistema.")
     except Exception as e:
         print(f"Si è verificato un errore imprevisto: {e}")
+    return process
 
-def run_client(clientClass):
+def run_client(player):
     # 1. Definisci le tue variabili (come faresti in Bash)
     MAIN_JAR = "target/tablut_benchmark_jar.jar"
     SERVER_CLASS = "it.unibo.ai.didattica.competition.tablut.server.Server"
@@ -66,12 +67,13 @@ def run_client(clientClass):
 
     # 3. Costruisci il comando come una lista di argomenti
     #    Questo è più sicuro che usare una stringa unica (evita shell injection)
+
     cmd = [
               "java",
               "-cp",
               MAIN_JAR,
-              clientClass
-          ] + ['5']# Aggiunge i parametri alla fine
+              player.client_name
+          ] + [player.role, '5', 'localhost', player.name]# Aggiunge i parametri alla fine
 
     print(f"Avvio del client... Log su: {log_file_path}")
 
@@ -94,26 +96,33 @@ def run_client(clientClass):
         print("ERRORE: Comando 'java' non trovato. Assicurati che sia nel PATH di sistema.")
     except Exception as e:
         print(f"Si è verificato un errore imprevisto: {e}")
+    return process
 
 
 def match_bw_players(p1,p2):
     #start server
-    run_server()
+    server_process = run_server()
     time.sleep(1)
     #run client p1 with heuristics in input
-    run_client(p1.client_name)
+    client1_process = run_client(p1)
     time.sleep(1)
     #run client p2 with heuristics in input
-    run_client(p2.client_name)
+    client2_process = run_client(p2)
     time.sleep(1)
+    processes = [server_process, client1_process, client2_process]
+    for process in processes:
+        process.wait()
+        print(f"Processo (PID: {process.pid}) ha terminato.")
+    print("Tutti i processi del match hanno terminato")
     pass
 
 
 def match_bw_superplayers(sp1,sp2):
     # white sp1 vs black sp2
     match_bw_players(sp1.player_w,sp2.player_b)
+
     # black sp1 vs white sp2
-    #match_bw_players(sp1.playerB,sp2.playerW)
+    match_bw_players(sp1.player_b,sp2.player_w)
 
     pass
 
@@ -197,26 +206,26 @@ if __name__ == "__main__":
     # (Questo simula un file JSON che già esiste)
 
     example_json_list_content = """
-    [
+ [
   {
     "superPlayerName": "BaselineBlack_BaselineWhite_Superplayer",
     "playerW": {
-      "name": "BaselineWhite", "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.baseline.BaselineWhitePlayer", "role": "W",
+      "name": "BaselineWhite", "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.baseline.BaselinePlayer", "role": "WHITE",
       "heuristics": {"controlloCentro": 0.75, "sicurezzaRe": 0.9}
     },
-    "playerB": {
-      "name": "BaselineBlack", "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.baseline.BaselineBlackPlayer", "role": "B",
+    "playerB": {   
+      "name": "BaselineBlack", "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.baseline.BaselinePlayer", "role": "BLACK",
       "heuristics": {"controlloCentro": 0.72, "strutturaPedonale": 0.85}
     }
   },
   {
     "superPlayerName": "TavolettaBlack_TavolettaWhite_Superplayer",
     "playerW": {
-      "name": "TavolettaWhite", "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.tavoletta.TavolettaWhitePlayer", "role": "W",
+      "name": "TavolettaWhite", "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.tavoletta.TavolettaPlayer", "role": "WHITE",
       "heuristics": {"attivitaPezzi": 0.95}
     },
     "playerB": {
-      "name": "TavolettaBlack", "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.tavoletta.TavolettaBlackPlayer", "role": "B",
+      "name": "TavolettaBlack", "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.tavoletta.TavolettaPlayer", "role": "BLACK",
       "heuristics": {"difesaPura": 0.88}
     }
   }
@@ -235,10 +244,12 @@ if __name__ == "__main__":
     print("\n--- Inizio caricamento partite ---")
     list_superplayers = load_superplayers_from_file(nome_file_esempio)
 
-    # --- C. Verifichiamo i risultati ---
-    print(list_superplayers)
 
     match_bw_superplayers(list_superplayers[0], list_superplayers[1])
+
+
+
+
 
 
 

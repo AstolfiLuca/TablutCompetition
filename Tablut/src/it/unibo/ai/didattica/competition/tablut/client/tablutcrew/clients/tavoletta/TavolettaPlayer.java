@@ -60,6 +60,7 @@ public class TavolettaPlayer extends TablutClient {
         String ip = "localhost";
         int timeout = 60;
         boolean deb = false;
+        String name = "TavolettaPlayer";
 
         if(args.length < 1) {
             System.out.printf("ERROR: You must specify which player you are [WHITE | BLACK]\n" +
@@ -67,50 +68,12 @@ public class TavolettaPlayer extends TablutClient {
             System.exit(1);
         } else {
             role = (args[0]);
+            timeout = Integer.parseInt(args[1]);
+            ip = args[2];
+            name = args[3];
         }
 
-        if(args.length == 2) {
-            try {
-                timeout = Integer.parseInt(args[1]);
-            } catch (NumberFormatException e) {
-                e.printStackTrace();
-                System.out.printf("ERROR: Timeout must be an integer representing seconds\n" +
-                        "\tUSAGE: ./runmyplayer <black|white> <timeout-in-seconds> <server-ip> <debug>\n");
-                System.exit(1);
-            }
-        }
 
-        if(args.length == 3) {
-            try {
-                timeout = Integer.parseInt(args[1]);
-                ip = args[2];
-            } catch (NumberFormatException e) {
-                e.printStackTrace();
-                System.out.printf("ERROR: Timeout must be an integer representing seconds\n" +
-                        "\tUSAGE: ./runmyplayer <black|white> <timeout-in-seconds> <server-ip> <debug>\n");
-                System.exit(1);
-            }
-        }
-
-        if(args.length == 4) {
-            try {
-                timeout = Integer.parseInt(args[1]);
-                ip = args[2];
-            } catch (NumberFormatException e) {
-                e.printStackTrace();
-                System.out.printf("ERROR: Timeout must be an integer representing seconds\n" +
-                        "\tUSAGE: ./runmyplayer <black|white> <timeout-in-seconds> <server-ip> <debug>\n");
-                System.exit(1);
-            }
-
-            if(args[3].equals("debug")) {
-                deb = true;
-            } else {
-                System.out.printf("ERROR: The last argument can be only 'debug' and it allow to print logs during search\n" +
-                        "\tUSAGE: ./runmyplayer <black|white> <timeout-in-seconds> <server-ip> <debug>");
-                System.exit(1);
-            }
-        }
 
         System.out.println("Team Gionnino9000\n\nMembers:\n\tFederico Andrucci\n\tKarina Chichifoi\n\tAlex Gianelli\n\tMichele Righi\n");
         System.out.println("Player:  " + role);
@@ -118,7 +81,7 @@ public class TavolettaPlayer extends TablutClient {
         System.out.println("Server:  " + ip);
         System.out.println("Debug:   " + deb + "\n");
 
-        TavolettaPlayer client = new TavolettaPlayer(role, PLAYER_NAME + " (Team " + TEAM_NAME + ")", timeout, ip, gameType, deb);
+        TavolettaPlayer client = new TavolettaPlayer(role, name, timeout, ip, gameType, deb);
         client.run();
     }
 

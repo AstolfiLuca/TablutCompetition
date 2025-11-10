@@ -50,14 +50,11 @@ public class BaselinePlayer extends TablutClient {
         } else {
             System.out.println(args[0]);
             role = (args[0]);
-        }
-        if (args.length == 2) {
-            System.out.println(args[1]);
             timeout = Integer.parseInt(args[1]);
-        }
-        if (args.length == 3) {
             ipAddress = args[2];
+            name = args[3];
         }
+
         System.out.println("Selected client: " + args[0]);
 
         BaselinePlayer client = new BaselinePlayer(role, name, timeout, ipAddress);
