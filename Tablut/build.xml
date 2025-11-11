@@ -141,13 +141,13 @@
         <echo message="Java 1.8 confirmed."/>
     </target>
 
+    <!--Queste properties possono essere sovrascritte dal lancio di ant da riga di comando-->
     <property name="bin.dir" location="build"/>
     <property name="lib.dir" location="lib"/>
     <property name="dest.dir" location="target"/>
     <property name="dest.lib.dir" location="${dest.dir}/libs"/>
     <property name="dest.lib.filename" value="libs"/>
-    <property name="final.jar.name" value="tablut_benchmark_jar"/>
-    <property name="output.class.list" value="player_classes.txt"/>
+    <property name="final.jar.name" value="tablut_uber_jar"/>
 
     <path id="project.classpath">
         <fileset dir="${lib.dir}">
@@ -168,7 +168,7 @@
         </jar>
 
     </target>
-    <!-- TODO ora è tightly coupled con lo script bash, idealmente può prendere gli argomenti, come il percorso del jar, come args-->
+
     <!-- jar it, extract above dependency-all.jar and zip it with project files -->
     <target name="uber-jar" depends="check-java-version, clean, compile, copy-dependencies"
             description="package, output to JAR">
