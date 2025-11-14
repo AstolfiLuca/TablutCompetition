@@ -2,23 +2,41 @@
   {
     "superPlayerName": "BaselineWhite_BaselineBlack_Superplayer",
     "playerW": {
-      "name": "BaselineWhite", "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.baseline.BaselinePlayer", "role": "WHITE",
-      "heuristics": {"controlloCentro": 0.75, "sicurezzaRe": 0.9}
+      "name": "BaselineWhite",
+      "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.baseline.BaselinePlayer",
+      "role": "WHITE",
+      "heuristics": {
+        "controlloCentro": 0.75,
+        "sicurezzaRe": 0.9
+      }
     },
     "playerB": {
-      "name": "BaselineBlack", "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.baseline.BaselinePlayer", "role": "BLACK",
-      "heuristics": {"controlloCentro": 0.72, "strutturaPedonale": 0.85}
+      "name": "BaselineBlack",
+      "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.baseline.BaselinePlayer",
+      "role": "BLACK",
+      "heuristics": {
+        "controlloCentro": 0.72,
+        "strutturaPedonale": 0.85
+      }
     }
   },
   {
     "superPlayerName": "TavolettaWhite_TavolettaBlack_Superplayer",
     "playerW": {
-      "name": "TavolettaWhite", "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.tavoletta.TavolettaPlayer", "role": "WHITE",
-      "heuristics": {"attivitaPezzi": 0.95}
+      "name": "TavolettaWhite",
+      "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.tavoletta.TavolettaPlayer",
+      "role": "WHITE",
+      "heuristics": {
+        "attivitaPezzi": 0.95
+      }
     },
     "playerB": {
-      "name": "TavolettaBlack", "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.tavoletta.TavolettaPlayer", "role": "BLACK",
-      "heuristics": {"difesaPura": 0.88}
+      "name": "TavolettaBlack",
+      "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.tavoletta.TavolettaPlayer",
+      "role": "BLACK",
+      "heuristics": {
+        "difesaPura": 0.88
+      }
     }
   }
 ]
