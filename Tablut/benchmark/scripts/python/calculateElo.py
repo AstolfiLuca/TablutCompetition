@@ -95,12 +95,10 @@ def calculate_elo_ratings(csv_file_path):
 
 # --- Esecuzione ---
 
-if __name__ == "__main__":
-    # Sostituisci 'tuoi_match.csv' con il percorso reale del tuo file
-    file_path = 'match_results.csv'
-
+def calculate_elo_ratings_sorted(file_path):
+    calculate_elo_ratings(file_path)
     final_ratings = calculate_elo_ratings(file_path)
-
+    final_ratings_dict = {}
     if final_ratings:
         print("--- Punteggi ELO Finali ---")
 
@@ -111,3 +109,8 @@ if __name__ == "__main__":
         for player, rating in sorted_ratings:
             # :.0f formatta il numero come intero (es. 1500 invece di 1500.123)
             print(f"{player}: {rating:.0f}")
+            final_ratings_dict[player] = rating
+
+    return final_ratings_dict
+
+

@@ -42,6 +42,8 @@ class Superplayer:
             player_b=Player.from_dict(data['playerB'])
         )
 
+RESULTS_FILE =  'match_results.csv'
+
 def run_server():
 
     MAIN_JAR = "../../target/tablut_uber_jar.jar"
@@ -260,20 +262,21 @@ def store_result_of_match(sp1,sp2):
     timestamp = datetime.now().strftime(format)
     match_result_row = (timestamp, sp1.super_player_name, sp2.super_player_name, sp1_points,sp2_points)
     headers = ["Timestamp", "SuperPlayer_1", "SuperPlayer_2", "Punteggio_SP1", "Punteggio_SP2"]
-    results_file_name = 'match_results.csv'
-    write_on_csv(results_file_name, headers, match_result_row)
+
+    write_on_csv(RESULTS_FILE, headers, match_result_row)
 
 
 
-
-if __name__ == "__main__":
-    superplayers_file = "../../players/superplayers.json"
+def run_tournament(superplayers_file):
     list_superplayers = load_superplayers_from_file(superplayers_file)
     delete_previous_logs("./logs")
     for sp1, sp2 in itertools.combinations(list_superplayers, 2):
         print(f"Partita: {sp1.super_player_name} vs {sp2.super_player_name}")
         match_bw_superplayers(sp1, sp2)
         store_result_of_match(sp1,sp2)
+    return RESULTS_FILE
+
+
 
 
 
