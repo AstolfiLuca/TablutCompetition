@@ -14,7 +14,6 @@ client:
   jar: *UBER_JAR
   timeout: 5
   server_ip: localhost
-  log_file: server.logs
 
 starting_elo: 1500
 k_factor: 32
