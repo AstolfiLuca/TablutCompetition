@@ -8,12 +8,12 @@ log = setup_logger(__name__)
 def getFitness():
     log.info("Avvio il torneo tra superplayer")
     tournament.run_tournament(CONFIG["superplayers_file"])
+    log.info("Calcolo il punteggio ELO dei Superplayers")
     return elo.calculate_elo_ratings_sorted(CONFIG["tournament_result_file"])
 
 
 if __name__ == "__main__":
-    #Mock
-    #chiamata alla fitness function
-
+    #Qui ci saranno gli altri step
+    #Chiamata alla fitness function
     fitness = getFitness()
-    print(fitness)
+    log.info(fitness)
