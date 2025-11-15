@@ -85,13 +85,14 @@ def run_client(player):
     os.makedirs(process_log_folder, exist_ok=True)
     timeout = CONFIG["client"]["timeout"]
     server_ip = CONFIG["client"]["server_ip"]
+    heuristics_dict_string = json.dumps(player.heuristics)
 
     cmd = [
               "java",
               "-cp",
               CONFIG["client"]["jar"],
               player.client_name
-          ] + [player.role, str(timeout), server_ip , player.name] # Aggiunge i parametri alla fine
+          ] + [player.role, str(timeout), server_ip , player.name, heuristics_dict_string] # Aggiunge i parametri alla fine
 
     log.debug(f"Avvio del client con timeout {timeout} secondi... Log su: {log_file_path}")
 
