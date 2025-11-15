@@ -42,7 +42,7 @@ class Superplayer:
             player_b=Player.from_dict(data['playerB'])
         )
 
-RESULTS_FILE =  'match_results.csv'
+RESULTS_FILE = 'results/match_results.csv'
 
 def run_server():
 
