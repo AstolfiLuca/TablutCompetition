@@ -4,12 +4,14 @@ import itertools
 import json
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Dict, Any, List
+from typing import Dict, Any
 import subprocess
 import os
 import time
 from config.config_reader import CONFIG
+from config.logger import setup_logger
 
+log = setup_logger(__name__)
 @dataclass
 class Player:
     name: str
@@ -56,7 +58,7 @@ def run_server():
               CONFIG["server"]["main_class"]
           ] + CONFIG["server"]["parameters"] # Aggiunge i parametri alla fine
 
-    print(f"Avvio del server... Log su: {log_file_path}") #TODO ATTENZIONE, IL FILE DI LOG CRESCE CON OGNI PARTITA
+    print(f"Avvio del server... Log su: {log_file_path}")
 
     try:
         #Apri il file di log in modalità 'append' ('a')
@@ -121,8 +123,7 @@ def match_bw_players(p1,p2):
     #run client p2 with heuristics in input
     client2_process = run_client(p2)
     time.sleep(1)
-    processes = [server_process, client1_process, client2_process]
-    for process in processes:
+    for process in [server_process, client1_process, client2_process]:
         process.wait()
         print(f"Processo (PID: {process.pid}) ha terminato.")
     print("Tutti i processi del match hanno terminato")
@@ -183,7 +184,7 @@ def lookup_game_result(player_w, player_b):
     player_w_name = player_w.name
     player_b_name = player_b.name
     game_log_file_name = '_'+player_w_name + '_vs_' + player_b_name + '_'
-    pattern = os.path.join("./logs", f"{game_log_file_name}*")
+    pattern = os.path.join(CONFIG["process_log_folder"], f"{game_log_file_name}*")
 
     files_found = glob.glob(pattern)
     filename = None
@@ -254,6 +255,8 @@ def store_result_of_match(sp1,sp2):
 
 
 def run_tournament(superplayers_file):
+    log.info("Prova Info")
+    log.debug("Prova Debug")
     list_superplayers = load_superplayers_from_file(superplayers_file)
     delete_previous_logs(CONFIG["process_log_folder"])
     for sp1, sp2 in itertools.combinations(list_superplayers, 2):
