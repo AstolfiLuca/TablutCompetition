@@ -1,0 +1,20 @@
+# config.yaml
+
+superplayers_file: ../../players/superplayers.json
+tournament_result_file: results/match_results.csv
+uber_jar: &UBER_JAR ../../target/tablut_uber_jar.jar
+process_log_folder: ./logs
+server:
+  jar: *UBER_JAR
+  main_class: it.unibo.ai.didattica.competition.tablut.server.Server
+  parameters: ["-g", "-t", "2000"]
+  log_file: server.logs
+client:
+  jar: *UBER_JAR
+  timeout: 5
+  server_ip: localhost
+  log_file: server.logs
+
+
+
+

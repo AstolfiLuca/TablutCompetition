@@ -8,7 +8,7 @@ from typing import Dict, Any, List
 import subprocess
 import os
 import time
-
+from config.config_reader import CONFIG
 
 @dataclass
 class Player:
@@ -19,7 +19,6 @@ class Player:
 
     @staticmethod
     def from_dict(data: Dict[str, Any]) -> 'Player':
-        """Crea un'istanza di Player da un dizionario (da JSON)."""
         return Player(
             name=data['name'],
             client_name=data['clientName'],
@@ -35,30 +34,27 @@ class Superplayer:
 
     @staticmethod
     def from_dict(data: Dict[str, Any]) -> 'Superplayer':
-        """Crea un'istanza di Superplayer da un dizionario."""
+
         return Superplayer(
             super_player_name=data['superPlayerName'],
             player_w=Player.from_dict(data['playerW']),
             player_b=Player.from_dict(data['playerB'])
         )
 
-RESULTS_FILE = 'results/match_results.csv'
+
 
 def run_server():
 
-    MAIN_JAR = "../../target/tablut_uber_jar.jar"
-    SERVER_CLASS = "it.unibo.ai.didattica.competition.tablut.server.Server"
-    SERVER_PARAMETERS = ["-g", "-t", "2000"]
-    LOGS_FOLDER = "./logs"
-    log_file_path = os.path.join(LOGS_FOLDER, "server.logs")
-    os.makedirs(LOGS_FOLDER, exist_ok=True)
+    process_log_folder = CONFIG["process_log_folder"]
+    log_file_path = os.path.join(process_log_folder, CONFIG["server"]["log_file"])
+    os.makedirs(process_log_folder, exist_ok=True)
 
     cmd = [
               "java",
               "-cp",
-              MAIN_JAR,
-              SERVER_CLASS
-          ] + SERVER_PARAMETERS # Aggiunge i parametri alla fine
+              CONFIG["server"]["jar"],
+              CONFIG["server"]["main_class"]
+          ] + CONFIG["server"]["parameters"] # Aggiunge i parametri alla fine
 
     print(f"Avvio del server... Log su: {log_file_path}") #TODO ATTENZIONE, IL FILE DI LOG CRESCE CON OGNI PARTITA
 
@@ -82,17 +78,16 @@ def run_server():
 
 def run_client(player):
 
-    MAIN_JAR = "../../target/tablut_uber_jar.jar"
-    LOGS_FOLDER = "./logs"
-    log_file_path = os.path.join(LOGS_FOLDER, player.name+".logs")
-    os.makedirs(LOGS_FOLDER, exist_ok=True)
+    process_log_folder = CONFIG["process_log_folder"]
+    log_file_path = os.path.join(process_log_folder, player.name+".logs")
+    os.makedirs(process_log_folder, exist_ok=True)
 
     cmd = [
               "java",
               "-cp",
-              MAIN_JAR,
+              CONFIG["client"]["jar"],
               player.client_name
-          ] + [player.role, '5', 'localhost', player.name]# Aggiunge i parametri alla fine
+          ] + [player.role, str(CONFIG["client"]["timeout"]), CONFIG["client"]["server_ip"], player.name] # Aggiunge i parametri alla fine
 
     print(f"Avvio del client... Log su: {log_file_path}")
 
@@ -131,7 +126,7 @@ def match_bw_players(p1,p2):
         process.wait()
         print(f"Processo (PID: {process.pid}) ha terminato.")
     print("Tutti i processi del match hanno terminato")
-    pass
+
 
 
 def match_bw_superplayers(sp1,sp2):
@@ -141,21 +136,13 @@ def match_bw_superplayers(sp1,sp2):
     # black sp1 vs white sp2
     match_bw_players(sp1.player_b,sp2.player_w)
 
-    pass
 
 
 
 
-def load_superplayers_from_file(filename: str) -> List[Superplayer]:
-    """
-    Carica una lista di oggetti Superplayer da un file JSON.
 
-    Args:
-        filename (str): Il percorso del file JSON da leggere.
+def load_superplayers_from_file(filename):
 
-    Returns:
-        List[Superplayer]: Una lista di istanze di Superplayer.
-    """
     print(f"Tentativo di lettura dal file: {filename}")
     try:
         with open(filename, 'r', encoding='utf-8') as f:
@@ -178,17 +165,16 @@ def load_superplayers_from_file(filename: str) -> List[Superplayer]:
 
 
 
-def delete_previous_logs(percorso_cartella):
-    if not os.path.isdir(percorso_cartella):
-        print(f"Errore: Il percorso '{percorso_cartella}' non è una cartella valida.")
+def delete_previous_logs(folder):
+    if not os.path.isdir(folder):
+        print(f"Errore: Il percorso '{folder}' non è una cartella valida.")
         return
-    print(f"Pulizia della cartella: {percorso_cartella}...")
-    for nome_elemento in os.listdir(percorso_cartella):
-        percorso_completo = os.path.join(percorso_cartella, nome_elemento)
+    print(f"Pulizia della cartella: {folder}...")
+    for nome_elemento in os.listdir(folder):
+        percorso_completo = os.path.join(folder, nome_elemento)
         try:
             if os.path.isfile(percorso_completo):
                 os.remove(percorso_completo)
-
 
         except Exception as e:
             print(f"Errore durante la cancellazione di {nome_elemento}: {e}")
@@ -263,18 +249,17 @@ def store_result_of_match(sp1,sp2):
     match_result_row = (timestamp, sp1.super_player_name, sp2.super_player_name, sp1_points,sp2_points)
     headers = ["Timestamp", "SuperPlayer_1", "SuperPlayer_2", "Punteggio_SP1", "Punteggio_SP2"]
 
-    write_on_csv(RESULTS_FILE, headers, match_result_row)
+    write_on_csv(CONFIG["tournament_result_file"], headers, match_result_row)
 
 
 
 def run_tournament(superplayers_file):
     list_superplayers = load_superplayers_from_file(superplayers_file)
-    delete_previous_logs("./logs")
+    delete_previous_logs(CONFIG["process_log_folder"])
     for sp1, sp2 in itertools.combinations(list_superplayers, 2):
         print(f"Partita: {sp1.super_player_name} vs {sp2.super_player_name}")
         match_bw_superplayers(sp1, sp2)
         store_result_of_match(sp1,sp2)
-    return RESULTS_FILE
 
 
 
