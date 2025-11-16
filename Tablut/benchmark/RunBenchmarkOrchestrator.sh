@@ -2,7 +2,7 @@
 
 
 set -e # Questo serve per terminare lo script in caso di fallimento di uno qualsiasi degli step
-SCRIPTS_DIR="scripts"
+SCRIPTS_DIR="scripts/bash"
 BUILD_UBER_JAR_COMMAND="buildUberJar.sh"
 EXTRACT_PLAYER_CLASSES_COMMAND="extractPlayerClasses.sh"
 #Primo step, build del uber jar
