@@ -1,18 +1,18 @@
 package it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.baseline;
 
-import it.unibo.ai.didattica.competition.tablut.client.TablutClient;
-import it.unibo.ai.didattica.competition.tablut.client.tablutcrew.search.TablutCrewSearch;
+import aima.core.search.adversarial.AdversarialSearch;
+import it.unibo.ai.didattica.competition.tablut.client.TablutHeuristicClient;
+import it.unibo.ai.didattica.competition.tablut.client.tablutcrew.heuristics.baseline.weights.BlackWeights;
+import it.unibo.ai.didattica.competition.tablut.client.tablutcrew.heuristics.baseline.weights.WhiteWeights;
+import it.unibo.ai.didattica.competition.tablut.client.tablutcrew.search.BaselineSearch;
 import it.unibo.ai.didattica.competition.tablut.domain.Action;
 import it.unibo.ai.didattica.competition.tablut.domain.GameAshtonTablut;
 import it.unibo.ai.didattica.competition.tablut.domain.State;
-import it.unibo.ai.didattica.competition.tablut.domain.StateTablut;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.List;
 
-public class BaselinePlayer extends TablutClient {
+public class BaselinePlayer extends TablutHeuristicClient {
     public final static String CLIENT_NAME = "TablutCrew";
     public final static String TEAM_NAME = "TablutCrew Team";
     // If the same state of the game is reached twice, draw
@@ -20,10 +20,30 @@ public class BaselinePlayer extends TablutClient {
     public final static int CACHED_MOVES_ALLOWED = -1;
     public final static String LOGS_FOLDER = "logs";
 
+    public BaselinePlayer(String player, String name, int timeout, String ipAddress, String weights, AdversarialSearch<State, Action> searchStrategy) throws UnknownHostException, IOException {
+        super(player, name, timeout, ipAddress, weights, searchStrategy);
+    }
 
+    public BaselinePlayer(String player, String name, int timeout, String ipAddress, String weights) throws UnknownHostException, IOException {
+        super(player, name, timeout, ipAddress, weights);
+        GameAshtonTablut game = new GameAshtonTablut(REPEATED_MOVES_ALLOWED, CACHED_MOVES_ALLOWED, LOGS_FOLDER, "White", "Black");
+        this.searchStrategy = new BaselineSearch(game, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, timeout, this.weights);
+    }
 
-    public BaselinePlayer(String player, String name, int timeout, String ipAddress) throws UnknownHostException, IOException {
+    public BaselinePlayer(String player, String name, int timeout, String ipAddress, AdversarialSearch<State, Action> searchStrategy, Double ...weights) throws UnknownHostException, IOException {
+        super(player, name, timeout, ipAddress, searchStrategy);
+        initializeWeights();
+        updateWeights(weights);
+        GameAshtonTablut game = new GameAshtonTablut(REPEATED_MOVES_ALLOWED, CACHED_MOVES_ALLOWED, LOGS_FOLDER, "White", "Black");
+        this.searchStrategy = new BaselineSearch(game, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, timeout, this.weights);
+    }
+
+    public BaselinePlayer(String player, String name, int timeout, String ipAddress, Double ...weights) throws UnknownHostException, IOException {
         super(player, name, timeout, ipAddress);
+        initializeWeights();
+        updateWeights(weights);
+        GameAshtonTablut game = new GameAshtonTablut(REPEATED_MOVES_ALLOWED, CACHED_MOVES_ALLOWED, LOGS_FOLDER, "White", "Black");
+        this.searchStrategy = new BaselineSearch(game, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, timeout, this.weights);
     }
 
     public BaselinePlayer(String player, String name, int timeout) throws UnknownHostException, IOException {
@@ -42,120 +62,46 @@ public class BaselinePlayer extends TablutClient {
         String role = "";
         String name = TEAM_NAME + " " + CLIENT_NAME;
         String ipAddress = "localhost";
+        String weights = null;
         int timeout = 60;
 
         if (args.length < 1) {
             System.out.println("You must specify which player you are (WHITE or BLACK)");
             System.exit(-1);
-        } else {
-            System.out.println(args[0]);
-            role = (args[0]);
         }
-        if (args.length == 2) {
-            System.out.println(args[1]);
+
+        role = args[0];
+        System.out.println("Role: " + role);
+
+        if (args.length > 1) {
             timeout = Integer.parseInt(args[1]);
+            System.out.println("Timeout: " + timeout);
         }
-        if (args.length == 3) {
+        if (args.length > 2) {
             ipAddress = args[2];
+            System.out.println("IP Address: " + ipAddress);
+        }
+        if (args.length > 3) {
+            weights = args[3];
+            System.out.println("Weights: " + weights);
         }
         System.out.println("Selected client: " + args[0]);
 
-        BaselinePlayer client = new BaselinePlayer(role, name, timeout, ipAddress);
+        BaselinePlayer client = new BaselinePlayer(role, name, timeout, ipAddress, weights);
         client.run();
     }
 
-    @Override
-    public void run() {
-        try {
-            this.declareName();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    private void initializeWeights() {
+        this.keys = this.getPlayer() == State.Turn.BLACK ? BlackWeights.getAllKeys() : WhiteWeights.getAllKeys();
+        this.weights = this.getPlayer() == State.Turn.BLACK ? BlackWeights.getDefaultWeights() : WhiteWeights.getDefaultWeights();
+    }
 
-
-        State state = new StateTablut();
-        GameAshtonTablut game = new GameAshtonTablut(
-                REPEATED_MOVES_ALLOWED,
-                CACHED_MOVES_ALLOWED,
-                LOGS_FOLDER,
-                "white",
-                "black"
-                );
-        List<int[]> pawns = new ArrayList<int[]>();
-        List<int[]> empty = new ArrayList<int[]>();
-
-        // Game loop
-        while(true){
-            try {
-                // Try to read the state from the server (blocking call)
-                this.read();
-            } catch (ClassNotFoundException | IOException e) {
-                e.printStackTrace();
-                System.exit(2);
-            }
-            // Update the state received
-            state = this.getCurrentState();
-            if (this.getPlayer().equals(State.Turn.WHITE)) {
-                if (state.getTurn().equals(StateTablut.Turn.WHITE)) {
-                    // Find best move
-                    TablutCrewSearch search = new TablutCrewSearch(game, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, this.getTimeout());
-                    Action bestAction = search.makeDecision(state);
-                    try {
-                        this.write(bestAction);
-                    } catch (ClassNotFoundException | IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-                // Opponent round
-                else if (state.getTurn().equals(StateTablut.Turn.BLACK)) {
-                    System.out.println("Waiting for your opponent move... ");
-                }
-                // White player wins
-                else if (state.getTurn().equals(StateTablut.Turn.WHITEWIN)) {
-                    System.out.println("YOU WIN!");
-                    System.exit(0);
-                }
-                // White player loses
-                else if (state.getTurn().equals(StateTablut.Turn.BLACKWIN)) {
-                    System.out.println("YOU LOSE!");
-                    System.exit(0);
-                }
-                // Draw
-                else if (state.getTurn().equals(StateTablut.Turn.DRAW)) {
-                    System.out.println("DRAW!");
-                    System.exit(0);
-                }
-            } else {
-                if (state.getTurn().equals(StateTablut.Turn.BLACK)) {
-                    // Find best move
-                    TablutCrewSearch search = new TablutCrewSearch(game, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, this.getTimeout());
-                    Action bestAction = search.makeDecision(state);
-                    try {
-                        this.write(bestAction);
-                    } catch (ClassNotFoundException | IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-                // Opponent round
-                else if (state.getTurn().equals(StateTablut.Turn.WHITE)) {
-                    System.out.println("Waiting for your opponent move... ");
-                }
-                // Black player wins
-                else if (state.getTurn().equals(StateTablut.Turn.BLACKWIN)) {
-                    System.out.println("YOU WIN!");
-                    System.exit(0);
-                }
-                // Black player loses
-                else if (state.getTurn().equals(StateTablut.Turn.WHITEWIN)) {
-                    System.out.println("YOU LOSE!");
-                    System.exit(0);
-                }
-                // Draw
-                else if (state.getTurn().equals(StateTablut.Turn.DRAW)) {
-                    System.out.println("DRAW!");
-                    System.exit(0);
-                }
-            }
+    private void updateWeights(Double[] weights) {
+        int i = 0;
+        // Store the passed weights
+        while (i < weights.length && i < keys.size()) {
+            this.weights.put(keys.get(i), weights[i]);
+            i += 1;
         }
     }
 }
