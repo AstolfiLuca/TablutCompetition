@@ -60,7 +60,7 @@ public class BaselinePlayer extends TablutHeuristicClient {
 
     public static void main(String[] args) throws UnknownHostException, IOException {
         String role = "";
-        String name = TEAM_NAME + " " + CLIENT_NAME;
+        String name = "";
         String ipAddress = "localhost";
         String weights = null;
         int timeout = 60;
@@ -82,7 +82,11 @@ public class BaselinePlayer extends TablutHeuristicClient {
             System.out.println("IP Address: " + ipAddress);
         }
         if (args.length > 3) {
-            weights = args[3];
+            name = args[3];
+            System.out.println("Name: " + name);
+        }
+        if (args.length > 4) {
+            weights = args[4];
             System.out.println("Weights: " + weights);
         }
         System.out.println("Selected client: " + args[0]);
