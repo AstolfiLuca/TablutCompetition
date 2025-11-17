@@ -14,6 +14,9 @@
                 <pathelement path="lib/gson-2.2.2.jar" />
                 <pathelement path="lib/commons-cli-1.4.jar" />
                 <pathelement path="lib/aima-core.jar" />
+                <pathelement path="lib/jackson-core-2.20.1.jar" />
+                <pathelement path="lib/jackson-annotations-2.20.jar" />
+                <pathelement path="lib/jackson-databind-2.20.1.jar" />
             </classpath>
         </javac>
         <copy todir="build">
@@ -26,7 +29,10 @@
             <classpath>
                 <pathelement location="lib/gson-2.2.2.jar"/>
                 <pathelement location="lib/commons-cli-1.4.jar"/>
-                <pathelement path="lib/aima-core.jar" />
+                <pathelement location="lib/jackson-core-2.20.1.jar" />
+                <pathelement location="lib/jackson-annotations-2.20.jar" />
+                <pathelement location="lib/jackson-databind-2.20.1.jar" />
+                <pathelement location="lib/aima-core.jar" />
                 <pathelement location="build"/>
             </classpath>
         </java>
@@ -51,7 +57,10 @@
             <classpath>
                 <pathelement location="lib/gson-2.2.2.jar"/>
                 <pathelement location="lib/commons-cli-1.4.jar"/>
-                <pathelement path="lib/aima-core.jar" />
+                <pathelement location="lib/jackson-core-2.20.1.jar" />
+                <pathelement location="lib/jackson-annotations-2.20.jar" />
+                <pathelement location="lib/jackson-databind-2.20.1.jar" />
+                <pathelement location="lib/aima-core.jar" />
                 <pathelement location="build"/>
             </classpath>
         </java>
@@ -61,17 +70,39 @@
         <java classname="it.unibo.ai.didattica.competition.tablut.client.TablutRandomWhiteClient" fork="true">
             <classpath>
                 <pathelement location="lib/gson-2.2.2.jar"/>
-                <pathelement path="lib/aima-core.jar" />
+                <pathelement location="lib/commons-cli-1.4.jar"/>
+                <pathelement location="lib/jackson-core-2.20.1.jar" />
+                <pathelement location="lib/jackson-annotations-2.20.jar" />
+                <pathelement location="lib/jackson-databind-2.20.1.jar" />
+                <pathelement location="lib/aima-core.jar" />
                 <pathelement location="build"/>
             </classpath>
         </java>
     </target>
 
     <target name="tablutcrewblack">
-        <java classname="it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.BlackTablutCrew" fork="true">
+        <java classname="it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.baseline.BaselineBlackPlayer" fork="true">
             <classpath>
                 <pathelement location="lib/gson-2.2.2.jar"/>
-                <pathelement path="lib/aima-core.jar" />
+                <pathelement location="lib/commons-cli-1.4.jar"/>
+                <pathelement location="lib/jackson-core-2.20.1.jar" />
+                <pathelement location="lib/jackson-annotations-2.20.jar" />
+                <pathelement location="lib/jackson-databind-2.20.1.jar" />
+                <pathelement location="lib/aima-core.jar" />
+                <pathelement location="build"/>
+            </classpath>
+        </java>
+    </target>
+
+    <target name="tablutcrewwhite">
+        <java classname="it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.baseline.BaselineWhitePlayer" fork="true">
+            <classpath>
+                <pathelement location="lib/gson-2.2.2.jar"/>
+                <pathelement location="lib/commons-cli-1.4.jar"/>
+                <pathelement location="lib/jackson-core-2.20.1.jar" />
+                <pathelement location="lib/jackson-annotations-2.20.jar" />
+                <pathelement location="lib/jackson-databind-2.20.1.jar" />
+                <pathelement location="lib/aima-core.jar" />
                 <pathelement location="build"/>
             </classpath>
         </java>
@@ -81,7 +112,7 @@
         <java classname="it.unibo.ai.didattica.competition.tablut.client.TablutRandomBlackClient" fork="true">
             <classpath>
                 <pathelement location="lib/gson-2.2.2.jar"/>
-                <pathelement path="lib/aima-core.jar" />
+                <pathelement location="lib/aima-core.jar" />
                 <pathelement location="build"/>
             </classpath>
         </java>
