@@ -4,14 +4,31 @@ import it.unibo.ai.didattica.competition.tablut.client.tablutcrew.heuristics.bas
 import it.unibo.ai.didattica.competition.tablut.client.tablutcrew.heuristics.baseline.utils.BaselineHeuristicsUtils;
 import it.unibo.ai.didattica.competition.tablut.domain.State;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class RhombusPosition extends Heuristic {
+    // Theoretical bounds
+    private static final Map<State.Turn, Double> MIN_VALUES = new HashMap<>();
+    private static final Map<State.Turn, Double> MAX_VALUES = new HashMap<>();
+
+    static {
+        // Black perspective: score = black - (white + king)
+        MIN_VALUES.put(State.Turn.BLACK, 0.0);
+        MAX_VALUES.put(State.Turn.BLACK, 8.0);
+
+        // White perspective: score = (white + king) - black
+        MIN_VALUES.put(State.Turn.WHITE, -8.0);
+        MAX_VALUES.put(State.Turn.WHITE, 0.0);
+    }
+
     // Matrix of favourite black positions in the initial stages to block the escape ways
     private final int[][] RHOMBUS_POSITIONS = {
-            {1,2},       {1,6},
+                  {1,2},       {1,6},
             {2,1},                   {2,7},
 
             {6,1},                   {6,7},
-            {7,2},       {7,6}
+                  {7,2},       {7,6}
     };
 
     public RhombusPosition(BaselineHeuristicsUtils.BoardState boardState, State.Turn currentPlayer) {
@@ -30,7 +47,12 @@ public class RhombusPosition extends Heuristic {
                 count++;
             }
         }
-        double score = (double) count / RHOMBUS_POSITIONS.length;
-        return currentPlayer == State.Turn.BLACK ? score : -score;
+        double minValue = MIN_VALUES.get(currentPlayer);
+        double maxValue = MAX_VALUES.get(currentPlayer);
+
+        double score = (double) count;
+
+        score = currentPlayer == State.Turn.BLACK ? score : -score;
+        return normalize(score, minValue, maxValue);
     }
 }

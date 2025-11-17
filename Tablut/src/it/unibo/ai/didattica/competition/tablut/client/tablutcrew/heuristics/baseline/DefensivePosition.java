@@ -4,7 +4,23 @@ import it.unibo.ai.didattica.competition.tablut.client.tablutcrew.heuristics.bas
 import it.unibo.ai.didattica.competition.tablut.client.tablutcrew.heuristics.baseline.utils.BaselineHeuristicsUtils;
 import it.unibo.ai.didattica.competition.tablut.domain.State;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class DefensivePosition extends Heuristic {
+    // Theoretical bounds
+    private static final Map<State.Turn, Double> MIN_VALUES = new HashMap<>();
+    private static final Map<State.Turn, Double> MAX_VALUES = new HashMap<>();
+
+    static {
+        // Black perspective
+        MIN_VALUES.put(State.Turn.BLACK, 0.0);
+        MAX_VALUES.put(State.Turn.BLACK, 16.0);
+
+        // White perspective
+        MIN_VALUES.put(State.Turn.WHITE, -16.0);
+        MAX_VALUES.put(State.Turn.WHITE, 0.0);
+    }
 
     public DefensivePosition(BaselineHeuristicsUtils.BoardState boardState, State.Turn currentPlayer) {
         super(boardState, currentPlayer);
@@ -46,6 +62,10 @@ public class DefensivePosition extends Heuristic {
                 score += 1;
             }
         }
-        return currentPlayer == State.Turn.BLACK ? score : -score;
+        double minValue = MIN_VALUES.get(currentPlayer);
+        double maxValue = MAX_VALUES.get(currentPlayer);
+
+        score = currentPlayer == State.Turn.BLACK ? score : -score;
+        return normalize(score, minValue, maxValue);
     }
 }

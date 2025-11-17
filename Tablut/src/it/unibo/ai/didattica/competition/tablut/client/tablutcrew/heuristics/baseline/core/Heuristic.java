@@ -13,4 +13,17 @@ public abstract class Heuristic {
     }
 
     public abstract double evaluateState(State state);
+
+    /**
+     * Min-Max normalization helper
+     * @param value the raw value to normalize
+     * @param min the minimum possible value
+     * @param max the maximum possible value
+     * @return normalized value in [-1, 1]
+     */
+    protected double normalize(double value, double min, double max) {
+        if (Math.abs(min - max) == 0) return 0; // Avoid division by zero
+        double normalized = (value - min) / (max - min);
+        return Math.max(-1.0, Math.min(1.0, normalized)); // Clamp to [-1, 1] if it falls outside the range
+    }
 }

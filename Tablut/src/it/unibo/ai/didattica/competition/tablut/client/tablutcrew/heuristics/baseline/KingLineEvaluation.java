@@ -4,9 +4,24 @@ import it.unibo.ai.didattica.competition.tablut.client.tablutcrew.heuristics.bas
 import it.unibo.ai.didattica.competition.tablut.client.tablutcrew.heuristics.baseline.utils.BaselineHeuristicsUtils;
 import it.unibo.ai.didattica.competition.tablut.domain.State;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class KingLineEvaluation extends Heuristic {
+    // Theoretical bounds
+    private static final Map<State.Turn, Double> MIN_VALUES = new HashMap<>();
+    private static final Map<State.Turn, Double> MAX_VALUES = new HashMap<>();
+
+    static {
+        // Black perspective
+        MIN_VALUES.put(State.Turn.BLACK, -28.0);
+        MAX_VALUES.put(State.Turn.BLACK, 18.0);
+
+        // White perspective
+        MIN_VALUES.put(State.Turn.WHITE, -18.0);
+        MAX_VALUES.put(State.Turn.WHITE, 24.0);
+    }
 
     public KingLineEvaluation(BaselineHeuristicsUtils.BoardState boardState, State.Turn currentPlayer) {
         super(boardState, currentPlayer);
@@ -86,6 +101,9 @@ public class KingLineEvaluation extends Heuristic {
                 score += currentPlayer == State.Turn.WHITE ? 0.5 : -1;  // White on same column
         }
 
-        return score;
+        double minValue = MIN_VALUES.get(currentPlayer);
+        double maxValue = MAX_VALUES.get(currentPlayer);
+
+        return normalize(score, minValue, maxValue);
     }
 }

@@ -4,10 +4,25 @@ import it.unibo.ai.didattica.competition.tablut.client.tablutcrew.heuristics.bas
 import it.unibo.ai.didattica.competition.tablut.client.tablutcrew.heuristics.baseline.utils.BaselineHeuristicsUtils;
 import it.unibo.ai.didattica.competition.tablut.domain.State;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class KingThreat extends Heuristic {
+    // Theoretical bounds
+    private static final Map<State.Turn, Double> MIN_VALUES = new HashMap<>();
+    private static final Map<State.Turn, Double> MAX_VALUES = new HashMap<>();
+
+    static {
+        // Black perspective
+        MIN_VALUES.put(State.Turn.BLACK, 0.0);
+        MAX_VALUES.put(State.Turn.BLACK, 4.0);
+
+        // White perspective
+        MIN_VALUES.put(State.Turn.WHITE, -4.0);
+        MAX_VALUES.put(State.Turn.WHITE, 0.0);
+    }
 
     public KingThreat(BaselineHeuristicsUtils.BoardState boardState, State.Turn currentPlayer) {
-
         super(boardState, currentPlayer);
     }
 
@@ -31,7 +46,10 @@ public class KingThreat extends Heuristic {
                 if (board[nr][nc].belongsTo(State.Turn.BLACK))
                     adjacentAttackers++;
         }
+        double minValue = MIN_VALUES.get(currentPlayer);
+        double maxValue = MAX_VALUES.get(currentPlayer);
 
-        return currentPlayer == State.Turn.BLACK ? adjacentAttackers : -adjacentAttackers;
+        double score = currentPlayer == State.Turn.BLACK ? adjacentAttackers : -adjacentAttackers;
+        return normalize(score, minValue, maxValue);
     }
 }
