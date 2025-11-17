@@ -1,0 +1,24 @@
+[
+  {
+    "superPlayerName": "BaselineBlack_BaselineWhite_Superplayer",
+    "playerW": {
+      "name": "BaselineWhite", "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.baseline.BaselineWhitePlayer", "role": "W",
+      "heuristics": {"controlloCentro": 0.75, "sicurezzaRe": 0.9}
+    },
+    "playerB": {
+      "name": "BaselineBlack", "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.baseline.BaselineBlackPlayer", "role": "B",
+      "heuristics": {"controlloCentro": 0.72, "strutturaPedonale": 0.85}
+    }
+  },
+  {
+    "superPlayerName": "TavolettaBlack_TavolettaWhite_Superplayer",
+    "playerW": {
+      "name": "TavolettaWhite", "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.tavoletta.TavolettaWhitePlayer", "role": "W",
+      "heuristics": {"attivitaPezzi": 0.95}
+    },
+    "playerB": {
+      "name": "TavolettaBlack", "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.tavoletta.TavolettaBlackPlayer", "role": "B",
+      "heuristics": {"difesaPura": 0.88}
+    }
+  }
+]
