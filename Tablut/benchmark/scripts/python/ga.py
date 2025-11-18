@@ -1,142 +1,277 @@
 import json
+import copy
 import random
-import subprocess
+import logging
+
 import numpy as np
-import pprint
+from config.logger import setup_logger
+from config.config_reader import CONFIG
 
-import calculateElo as ce
-
-# file usati
-base_SP_file    = "../../players/superplayers.json"
-fitness_file    = "fitness.json" 
-population_file = "population.json"
-final_file      = "final_superplayer.json"
+import calculateElo as elo
+import tournament as tournament
 
 
+"""
+SUPERPLAYER_BASE = {
+    "superPlayerName": f"{id}",
+    "playerW": {
+        "name": f"{id}_White",
+        "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.DinamicPlayer",
+        "role": "WHITE",
+        "heuristics": {...}
+    },
+    "playerB": {
+        "name": f"{id}_Black",
+        "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.DinamicPlayer",
+        "role": "BLACK",
+        "heuristics": {...}
+    }
+}
+"""
 
-# Crea il dizionario con le euristiche di ogni SP 
-def cleanSP(base_SP_list):
+log = setup_logger(__name__)
+
+base_superplayers_path = "../../players/base_superplayers.json"
+superplayers_path = "../../players/superplayers.json"
+final_population_path = "../../players/final_population.json"
+
+default_clientname = "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.DinamicPlayer" # NON USATA (potrebbe servire in caso di modifiche)
+
+last_id = 0  # GLOBAL SP ID COUNTER
+
+def getSPName(individual):
+    return individual["superPlayerName"]
+
+def getSPHeuristicsWhite(individual):
+    return individual["playerW"]["heuristics"]
+
+def getSPHeuristicsBlack(individual):
+    return individual["playerB"]["heuristics"]
+
+def getSPHeuristics(individual): # NON USATA (potrebbe servire in caso di modifiche)
+    return getSPHeuristicsWhite(individual) | getSPHeuristicsBlack(individual)
+
+def getPopulationHeuristics(pop): # NON USATA (potrebbe servire in caso di modifiche)
     heuristics = {}
-    SP_cleaned = {}
 
-    idSP = 1
+    # Salvo tutte le chiavi delle euristiche
+    for SP in pop:
+        heuristics |= getSPHeuristics(SP)
 
-    for SP in base_SP_list:
-        heuristics |= {k: 0 for k in SP["playerW"]["heuristics"].keys()} # salvo le nuove euristiche del bianco
-        heuristics |= {k: 0 for k in SP["playerB"]["heuristics"].keys()} # salvo le nuove euristiche del nero
+    # Imposto i valori delle euristiche a 0
+    for k in heuristics:
+        heuristics[k] = 0
+    
+    return heuristics
 
-        SP_cleaned[f"{idSP}"] = SP["playerW"]["heuristics"] | SP["playerB"]["heuristics"]
+def getNewIndividualName(individual):
+    global last_id
 
-        idSP += 1
+    name = str(last_id)
+    
+    individual["superPlayerName"] = name
+    individual["playerW"]["name"] = name + "_White"
+    individual["playerB"]["name"] = name + "_Black"
 
-    for i in range(1, len(base_SP_list) + 1):
-        SP_cleaned[f"{i}"] = heuristics | SP_cleaned[f"{i}"] # Imposto a 0 le euristiche non presenti originariamente nei superplayer  
-
-    return SP_cleaned
-
-
-# Mutazione decrescente (annealing)
-# Serve per esplorare inizialmente soluzioni abbastanza differenti tra loro, 
-# per poi passare piano piano a soluzioni più precise ed ottimali 
-# Nota: se non si passa current_gen la mutazione rimane quella di base (sigma)
-def mutation_probability(probability, current_gen=0, gens=1):
-    return probability * (1 - current_gen / gens)
+    last_id += 1
 
 
-# Funzione di mutazione proporzionale (mantieniamo la scala)
-def mutate(SP, probability, popsize, current_gen=0, gens=1):    
-    new[idSP] = {}
+def mutate(individual, probability, current_gen=0, gens=1):
+    prob = probability * (1 - float(current_gen) / gens) # Mutazione decrescente (annealing)
 
-    idSP = list(new.keys())[0]
+    W_H = getSPHeuristicsWhite(individual)
+    B_H = getSPHeuristicsBlack(individual)
 
-    mp = mutation_probability(probability, current_gen, gens)
+    for WH_key in W_H.keys():
+        W_H[WH_key] += int(np.random.normal(0, prob * W_H[WH_key]))
 
-    for key, val in list(new.values())[0].items():
-        if val == 0:
-            val = 0.01
+    for BH_key in B_H.keys():
+        B_H[BH_key] += int(np.random.normal(0, prob * B_H[BH_key]))
 
-        new[idSP][key] = round(val + np.random.normal(0, mp * val), 3) # v + 0 + deviazione standard (mp * v) casuale
+def crossover(parent1, parent2):
+    # Copio il genitore, comprese le euristiche che andrò a modificare
+    # Nota: uso parent1 ma andrebbe bene anche parent2, quello che ci interessa è la struttura
+    individual = copy.deepcopy(parent1)
 
-        print(new[key])
+    # Modifico le informazioni specifiche
+    getNewIndividualName(individual)
 
-    return new
+    # Individual 
+    individual_WH = getSPHeuristicsWhite(individual)
+    individual_BH = getSPHeuristicsBlack(individual)
+
+    # Parent 1
+    P1_WH = getSPHeuristicsWhite(parent1)
+    P1_BH = getSPHeuristicsBlack(parent1)
+
+    # Parent 2
+    P2_WH = getSPHeuristicsWhite(parent2)
+    P2_BH = getSPHeuristicsBlack(parent2)
+
+    # Casualmente scelgo le euristiche tra i genitori
+    # Nota: le chiavi dei genitori e dell'individuo sono uguali
+    for WH_key in individual_WH.keys(): 
+        individual_WH[WH_key] = random.choice([P1_WH[WH_key], P2_WH[WH_key]])
+
+    for BH_key in individual_BH.keys():
+        individual_BH[BH_key] = random.choice([P1_BH[BH_key], P2_BH[BH_key]])
+
+    return individual
 
 
-# inizializza popolazione clonando i semi
-def create_random_population(SP_list, popsize, delta):
+def generate_base(popsize, probability):
+    global last_id
+
     pop = []
 
-    while len(pop) < popsize:
-        idSP, heuristics = random.choice(list(SP_list.items()))
-        pop.append(mutate({idSP: heuristics}, probability=delta, popsize=popsize))
+    with open(base_superplayers_path, "r") as f:
+        base = json.load(f)
+
+    pop += base
+
+    remaining = popsize - len(base) # Numero di nuovi superplayer
+
+    while remaining > 0:
+        # Nota:
+        # Il resto tra il numero dei rimanenti e la dimensione della base 
+        # ci permette di avere una distribuzione equa dei superplayer base tra di superplayer mutati 
+        base_SP = base[remaining % len(base)]  
+        
+        
+        individual = copy.deepcopy(base_SP)
+
+        getNewIndividualName(individual)
+
+        mutate(
+            individual=base_SP, 
+            probability=delta, 
+            current_gen=0, 
+            gens=1, 
+        )
+
+        pop.append(individual)
+
+
+        remaining -= 1
+
+    return pop[:popsize]
+
+def getParent(pop, fitness_dict):
+    # Creo un vettore di pesi con lo stesso ordine di pop (diverso da fitness_dict)
+    weights = []
+
+    for individual in pop:
+        #Nota: uso dict.get perchè in fitness_dict non ci sono più tutti gli individui, ma solo i migliori
+        weights.append(fitness_dict.get(getSPName(individual), 0)) 
+         
+    parent = random.choices(pop, weights=weights, k=1)[0]
+
+    return parent
+
+def generate_new_members(pop, fitness_dict, num_children, probability, current_gen, gens):
+    new_members = []
+
+    while len(new_members) < num_children:
+        parent1 = getParent(pop, fitness_dict)
+        parent2 = getParent(pop, fitness_dict)
+
+        child = crossover(parent1, parent2)
+        child = mutate(child, probability, current_gen, gens)
+
+        new_members.append(child)
+
+    return new_members
+
+def select_best(pop, fitness_dict, popsize):
+    new_pop = []
+
+    for individual in pop:
+        if getSPName(individual) in fitness_dict.keys():
+            new_pop.append(individual)
     
-    return pop
+    return new_pop
 
-
-# Valuta la fitness chiamando i tuoi script Java/Bash
-def get_fitness(pop):
-    with open(population_file, "w") as f:
+def getFitness(pop):
+    # Salva popolazione
+    with open(superplayers_path, "w") as f:
         json.dump(pop, f, indent=2)
 
-    # esegue il tuo torneo esterno
-    result = ce.return_fitness(pop)
+    # Esegui il torneo
+    tournament.run_tournament(CONFIG["superplayers_file"])
 
-    # Il torneo deve generare un file fitness.json
-    with open(fitness_file) as f:
-        fitness = json.load(f)
+    # Calcola l'elo 
+    fitness_dict = elo.calculate_elo_ratings_sorted(CONFIG["tournament_result_file"])
 
-    return fitness     # lista di numeri, ordinata come pop
+    # Restituisci la fitness {name : elo}
+    return fitness_dict 
 
 
-# Evoluzione vera e propri
-def run(pop, popsize, gens, sigma):
+def run(pop, gens, popsize, num_children, probability, verbose=False):
+    fitness_dict = getFitness(pop) # TOGLI IL COMMENTO QUANDO FUNZIONERÀ IL TORNEO
+
     for gen in range(gens):
-        print(f"--- GENERAZIONE {gen} ---")
+        if verbose:
+            log.info(f"=== GENERATION {gen} ===")
 
-        # valuta la popolazione (via script Java/Bash)
-        fitness = get_fitness(pop)
+            best = max(
+                pop, 
+                key=lambda individual: fitness_dict[getSPName(individual)]
+            )
 
-        # ordina per fitness (max → migliore)
-        ranked = sorted(zip(pop, fitness), key=lambda x: x[1], reverse=True)
+            log.info(f"The best so far is {getSPName(best)} with fitness {fitness_dict[getSPName(best)]}")
 
-        elities = ranked[:popsize]
+        # Creo i nuovi membri
+        new_members = generate_new_members(
+            pop=pop, 
+            fitness_dict=fitness_dict, 
+            num_children=10, 
+            probability=probability, 
+            current_gen=gen, 
+            gens=gens
+        )
 
-        print("Migliore:", ranked[0][1])
+        # Unisco i nuovi membri ai precedenti
+        combined = pop + new_members
 
-        # rigenera popolazione con mutazioni degli élite
-        new_pop = []
-        while len(new_pop) < popsize:
-            base = random.choice(elites)
-            new_pop.append(mutate(base, sigma, popsize=popsize, current_gen=gen, gens=gens))
+        # Calcolo la fitness ({name : elo}) degli individui della popolazione 
+        # Nota: dato che sono già ordinati posso rimuovere gli "extra"
 
-        pop = new_pop
+        fitness_dict = getFitness(combined)[:popsize] 
+
+        # Seleziono solo i migliori
+        pop = select_best(pop, fitness_dict, popsize) 
 
     return pop
-
 
 
 if __name__ == "__main__":
+    # Attivazione logging
+    verbose = False
 
-    # parametri dell'algoritmo genetico
-    popsize = 3
-    gens = 50
+    # Parametri dell'algoritmo genetico
+    popsize = 4
+    num_children = 1
+    gens = 3
 
-    # Probabilità di mutazione
-    delta = 0.2 # Inizializzazione
-    sigma = 0.07 # Ogni iterazione
+    # Parametri per la probabilità di mutazione
+    delta = 0.2  # Variazione iniziale (possibilmente alta)
+    sigma = 0.05 # Variazione durante le iterazioni (moderata)
 
+    # Run GA
+    final_pop = run(
+        pop=generate_base(popsize, delta),
+        gens=gens,
+        popsize=popsize,
+        num_children=num_children,
+        probability=sigma,
+        verbose=verbose
+    )
 
+    if verbose:
+        log.info("=== FINAL pop ===")
 
-    with open(base_SP_file) as f:
-        base_SP_list = json.load(f)
+        for individual in final_pop:
+            log.info(individual)
 
-    cleaned_SP_list = cleanSP(base_SP_list=base_SP_list)
-
-    pop = create_random_population(SP_list=cleaned_SP_list, popsize=popsize, delta=delta)
-
-
-    final_population = run(originalSP, popsize=popsize, gens=gens, sigma=sigma)
-
-    with open(final_population_filename, "w") as f:
-        json.dump(final_population, f, indent=2)
-
+    with open(final_population_path, "w") as f:
+        json.dump(final_pop, f, indent=2)

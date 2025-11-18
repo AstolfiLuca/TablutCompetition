@@ -12,9 +12,9 @@
         <mkdir dir="build"/>
         <javac encoding="iso-8859-1" srcdir="src" destdir="build" includeantruntime="false">
             <classpath>
+                <pathelement path="lib/aima-core.jar" />
                 <pathelement path="lib/gson-2.2.2.jar" />
                 <pathelement path="lib/commons-cli-1.4.jar" />
-                <pathelement path="lib/aima-core.jar" />
             </classpath>
         </javac>
         <copy todir="build">
@@ -170,7 +170,7 @@
     </target>
 
     <!-- jar it, extract above dependency-all.jar and zip it with project files -->
-    <target name="uber-jar" depends="check-java-version, clean, compile, copy-dependencies"
+    <target name="uber-jar" depends="clean, compile, copy-dependencies"
             description="package, output to JAR">
 
         <mkdir dir="${dest.dir}" />

@@ -44,51 +44,5 @@
         "difesaPura": 0.88
       }
     }
-  },
-  {
-    "superPlayerName": "0",
-    "playerW": {
-      "name": "0_White",
-      "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.baseline.BaselinePlayer",
-      "role": "WHITE",
-      "heuristics": {
-        "controlloCentro": 0.75,
-        "sicurezzaRe": 0.9,
-        "attivitaPezzi": 0
-      }
-    },
-    "playerB": {
-      "name": "0_Black",
-      "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.baseline.BaselinePlayer",
-      "role": "BLACK",
-      "heuristics": {
-        "controlloCentro": 0.72,
-        "strutturaPedonale": 0.85,
-        "difesaPura": 0
-      }
-    }
-  },
-  {
-    "superPlayerName": "1",
-    "playerW": {
-      "name": "1_White",
-      "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.tavoletta.TavolettaPlayer",
-      "role": "WHITE",
-      "heuristics": {
-        "controlloCentro": 0,
-        "sicurezzaRe": 0,
-        "attivitaPezzi": 0.95
-      }
-    },
-    "playerB": {
-      "name": "1_Black",
-      "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.tavoletta.TavolettaPlayer",
-      "role": "BLACK",
-      "heuristics": {
-        "controlloCentro": 0,
-        "strutturaPedonale": 0,
-        "difesaPura": 0.88
-      }
-    }
   }
 ]

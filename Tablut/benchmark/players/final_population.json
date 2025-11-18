@@ -23,29 +23,6 @@
     }
   },
   {
-    "superPlayerName": "TavolettaWhite_TavolettaBlack_Superplayer",
-    "playerW": {
-      "name": "TavolettaWhite",
-      "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.tavoletta.TavolettaPlayer",
-      "role": "WHITE",
-      "heuristics": {
-        "controlloCentro": 0,
-        "sicurezzaRe": 0,
-        "attivitaPezzi": 0.95
-      }
-    },
-    "playerB": {
-      "name": "TavolettaBlack",
-      "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.tavoletta.TavolettaPlayer",
-      "role": "BLACK",
-      "heuristics": {
-        "controlloCentro": 0,
-        "strutturaPedonale": 0,
-        "difesaPura": 0.88
-      }
-    }
-  },
-  {
     "superPlayerName": "0",
     "playerW": {
       "name": "0_White",
