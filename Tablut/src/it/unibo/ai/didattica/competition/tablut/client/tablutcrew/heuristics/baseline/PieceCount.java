@@ -34,7 +34,8 @@ public class PieceCount extends Heuristic {
         double minValue = MIN_VALUES.get(currentPlayer);
         double maxValue = MAX_VALUES.get(currentPlayer);
 
-        double score = currentPlayer == State.Turn.WHITE ? ((whitePawns + 1) - blackPawns) : (blackPawns - (whitePawns + 1));
-        return normalize(score, minValue, maxValue);
+        int pieceScore = currentPlayer == State.Turn.WHITE ? ((whitePawns + 1) - blackPawns) : (blackPawns - (whitePawns + 1));
+        double score = normalize(pieceScore, minValue, maxValue);
+        return (score * 2) - 1;
     }
 }

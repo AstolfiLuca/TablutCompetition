@@ -43,7 +43,7 @@ public class PawnsSafety extends Heuristic {
         double minValue = MIN_VALUES.get(currentPlayer);
         double maxValue = MAX_VALUES.get(currentPlayer);
 
-        double score = pawnsAlive - BaselineHeuristicsUtils.countCapturablePawns(state, enemy);
-        return normalize(score, minValue, maxValue);
+        double score = normalize(pawnsAlive - BaselineHeuristicsUtils.countCapturablePawns(state, enemy), minValue, maxValue);
+        return (score * 2) - 1;
     }
 }

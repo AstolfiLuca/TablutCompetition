@@ -18,8 +18,8 @@ public class RhombusPosition extends Heuristic {
         MAX_VALUES.put(State.Turn.BLACK, 8.0);
 
         // White perspective: score = (white + king) - black
-        MIN_VALUES.put(State.Turn.WHITE, -8.0);
-        MAX_VALUES.put(State.Turn.WHITE, 0.0);
+        MIN_VALUES.put(State.Turn.WHITE, 0.0);
+        MAX_VALUES.put(State.Turn.WHITE, 8.0);
     }
 
     // Matrix of favourite black positions in the initial stages to block the escape ways
@@ -50,9 +50,7 @@ public class RhombusPosition extends Heuristic {
         double minValue = MIN_VALUES.get(currentPlayer);
         double maxValue = MAX_VALUES.get(currentPlayer);
 
-        double score = (double) count;
-
-        score = currentPlayer == State.Turn.BLACK ? score : -score;
-        return normalize(score, minValue, maxValue);
+        double score = normalize(count, minValue, maxValue);
+        return currentPlayer == State.Turn.BLACK ? score : -score;
     }
 }

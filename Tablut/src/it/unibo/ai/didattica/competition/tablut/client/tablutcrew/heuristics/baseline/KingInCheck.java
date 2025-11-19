@@ -18,8 +18,8 @@ public class KingInCheck extends Heuristic {
         MAX_VALUES.put(State.Turn.BLACK, 10.0);
 
         // White perspective
-        MIN_VALUES.put(State.Turn.WHITE, -10.0);
-        MAX_VALUES.put(State.Turn.WHITE, 0.0);
+        MIN_VALUES.put(State.Turn.WHITE, 0.0);
+        MAX_VALUES.put(State.Turn.WHITE, 10.0);
     }
 
     public KingInCheck(BaselineHeuristicsUtils.BoardState boardState, State.Turn currentPlayer) {

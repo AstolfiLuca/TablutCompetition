@@ -19,8 +19,8 @@ public class ManhattanToKing extends Heuristic {
         MAX_VALUES.put(State.Turn.BLACK, 211.0);
 
         // White perspective
-        MIN_VALUES.put(State.Turn.WHITE, -211.0);
-        MAX_VALUES.put(State.Turn.WHITE, 0.0);
+        MIN_VALUES.put(State.Turn.WHITE, 0.0);
+        MAX_VALUES.put(State.Turn.WHITE, 211.0);
     }
 
     public ManhattanToKing(BaselineHeuristicsUtils.BoardState boardState, State.Turn currentPlayer) {
@@ -53,9 +53,7 @@ public class ManhattanToKing extends Heuristic {
         double minValue = MIN_VALUES.get(currentPlayer);
         double maxValue = MAX_VALUES.get(currentPlayer);
 
-        int score = Math.abs(maximumOverallDistance - overallDistance);
-        score = currentPlayer == State.Turn.BLACK ? score : -score;
-
-        return normalize(score, minValue, maxValue);
+        double score = normalize(Math.abs(maximumOverallDistance - overallDistance), minValue, maxValue);
+        return currentPlayer == State.Turn.BLACK ? score : -score;
     }
 }

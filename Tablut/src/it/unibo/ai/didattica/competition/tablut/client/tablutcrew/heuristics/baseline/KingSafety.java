@@ -14,8 +14,8 @@ public class KingSafety extends Heuristic {
 
     static {
         // Black perspective
-        MIN_VALUES.put(State.Turn.BLACK, -4.0);
-        MAX_VALUES.put(State.Turn.BLACK, 0.0);
+        MIN_VALUES.put(State.Turn.BLACK, 0.0);
+        MAX_VALUES.put(State.Turn.BLACK, 4.0);
 
         // White perspective
         MIN_VALUES.put(State.Turn.WHITE, 0.0);
@@ -50,7 +50,7 @@ public class KingSafety extends Heuristic {
         double minValue = MIN_VALUES.get(currentPlayer);
         double maxValue = MAX_VALUES.get(currentPlayer);
 
-        double score = currentPlayer == State.Turn.WHITE ? adjacentDefenders : -adjacentDefenders;
-        return normalize(score, minValue, maxValue);
+        double score = normalize(adjacentDefenders, minValue, maxValue);
+        return currentPlayer == State.Turn.WHITE ? score : -score;
     }
 }

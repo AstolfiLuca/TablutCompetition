@@ -19,8 +19,8 @@ public class KingLineEvaluation extends Heuristic {
         MAX_VALUES.put(State.Turn.BLACK, 18.0);
 
         // White perspective
-        MIN_VALUES.put(State.Turn.WHITE, -18.0);
-        MAX_VALUES.put(State.Turn.WHITE, 24.0);
+        MIN_VALUES.put(State.Turn.WHITE, -28.0);
+        MAX_VALUES.put(State.Turn.WHITE, 18.0);
     }
 
     public KingLineEvaluation(BaselineHeuristicsUtils.BoardState boardState, State.Turn currentPlayer) {
@@ -53,9 +53,9 @@ public class KingLineEvaluation extends Heuristic {
 
             // Citadels and throne block king's movement
             if (BaselineHeuristicsUtils.isInCitadel(r, c))
-                score += currentPlayer == State.Turn.WHITE ? -1 : +1;
+                score -= 1;
             if (BaselineHeuristicsUtils.isInThrone(r, c))
-                score += currentPlayer == State.Turn.WHITE ? -1 : +1;
+                score -= 1;
 
             // Escape evaluation
             if (BaselineHeuristicsUtils.isInEscape(r, c)) {
@@ -76,11 +76,11 @@ public class KingLineEvaluation extends Heuristic {
 
                 // Assign penalties based on threat level
                 if (lineClear) {
-                    score += currentPlayer == State.Turn.WHITE ? 10 : -10; // King can escape directly
+                    score += 10; // King can escape directly
                 } else if (distToEscape <= 2) {
-                    score += currentPlayer == State.Turn.WHITE ? 3 : -5; // King is close to escape
+                    score += 5; // King is close to escape
                 } else if (distToEscape <= 4) {
-                    score += currentPlayer == State.Turn.WHITE ? 2 : -2; // King is not so close to escape
+                    score += 2; // King is not so close to escape
                 }
             }
         }
@@ -88,22 +88,23 @@ public class KingLineEvaluation extends Heuristic {
         // Check black pawns ONLY on king's row/col
         for (Integer[] pos : blackPositions) {
             if (pos[0] == kingRow)
-                score += currentPlayer == State.Turn.WHITE ? -1 : 1;  // Black on same row
+                score -= 1;  // Black on same row
             if (pos[1] == kingCol)
-                score += currentPlayer == State.Turn.WHITE ? -1 : 1;  // Black on same column
+                score -= 1;  // Black on same column
         }
 
         // Check white pawns ONLY on king's row/col
         for (Integer[] pos : whitePositions) {
             if (pos[0] == kingRow)
-                score += currentPlayer == State.Turn.WHITE ? 0.5 : -1;  // White on same row
+                score += 0.5;  // White on same row
             if (pos[1] == kingCol)
-                score += currentPlayer == State.Turn.WHITE ? 0.5 : -1;  // White on same column
+                score += 0.5;  // White on same column
         }
 
         double minValue = MIN_VALUES.get(currentPlayer);
         double maxValue = MAX_VALUES.get(currentPlayer);
 
-        return normalize(score, minValue, maxValue);
+        score = normalize(score, minValue, maxValue);
+        return currentPlayer == State.Turn.WHITE ? score : -score;
     }
 }

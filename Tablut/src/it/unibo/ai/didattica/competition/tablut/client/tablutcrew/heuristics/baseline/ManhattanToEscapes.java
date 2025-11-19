@@ -14,8 +14,8 @@ public class ManhattanToEscapes extends Heuristic {
 
     static {
         // Black perspective
-        MIN_VALUES.put(State.Turn.BLACK, -16.0);
-        MAX_VALUES.put(State.Turn.BLACK, 0.0);
+        MIN_VALUES.put(State.Turn.BLACK, 0.0);
+        MAX_VALUES.put(State.Turn.BLACK, 16.0);
 
         // White perspective
         MIN_VALUES.put(State.Turn.WHITE, 0.0);
@@ -54,9 +54,7 @@ public class ManhattanToEscapes extends Heuristic {
         double maxValue = MAX_VALUES.get(currentPlayer);
 
         int maxPossibleDistance = 16;
-        int score = Math.abs(maxPossibleDistance - minDistance);
-        score = currentPlayer == State.Turn.WHITE ? score : -score;
-
-        return normalize(score, minValue, maxValue);
+        double score = normalize(Math.abs(maxPossibleDistance - minDistance), minValue, maxValue);
+        return currentPlayer == State.Turn.WHITE ? score : -score;
     }
 }
