@@ -18,6 +18,16 @@ client:
 starting_elo: 1500
 k_factor: 32
 
+gen_alg_popsize: 2
+gen_alg_num_children: 2
+gen_alg_num_generations: 3
+gen_alg_delta: 0.4
+gen_alg_sigma: 0.3
+gen_alg_base_superplayers_path: ../../players/base_superplayers.json
+gen_alg_superplayers_path: ../../players/superplayers.json
+gen_alg_final_population_path: ../../players/final_population.json
+
+
 logger_level: INFO
 
 

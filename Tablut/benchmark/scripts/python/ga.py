@@ -31,13 +31,11 @@ SUPERPLAYER_BASE = {
 
 log = setup_logger(__name__)
 
-base_superplayers_path = "../../players/base_superplayers.json"
-superplayers_path = "../../players/superplayers.json"
-final_population_path = "../../players/final_population.json"
+base_superplayers_path = CONFIG["gen_alg_base_superplayers_path"]
+superplayers_path = CONFIG["gen_alg_superplayers_path"]
+final_population_path = CONFIG["gen_alg_final_population_path"]
 
-default_clientname = "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.DinamicPlayer" # NON USATA (potrebbe servire in caso di modifiche)
-
-last_id = 0  # GLOBAL SP ID COUNTER
+last_id = CONFIG["gen_alg_popsize"] + 1 # GLOBAL SP ID COUNTER
 
 def getSPName(individual):
     return individual["superPlayerName"]
@@ -67,7 +65,7 @@ def getPopulationHeuristics(pop): # NON USATA (potrebbe servire in caso di modif
 def getNewIndividualName(individual):
     global last_id
 
-    name = str(last_id)
+    name = 'SP'+str(last_id)
     
     individual["superPlayerName"] = name
     individual["playerW"]["name"] = name + "_White"
@@ -261,19 +259,19 @@ def run(pop, gens, popsize, num_children, probability, verbose=False):
 
         # Unisco i nuovi membri ai precedenti
         combined = pop + new_members
-        log.info(f"Combined = {combined}")
+        log.info(f"Combined Population = {combined}")
         log.info(f"Combined Names = {[getSPName(individual) for individual in combined]}")
 
         # Calcolo la fitness ({name : elo}) degli individui della popolazione 
         # Nota: dato che sono già ordinati posso rimuovere gli "extra"
 
         fitness_dict = getFitness(combined, True)
-        log.info(f"Fitness_dict of all = {fitness_dict}")
+        log.info(f"Fitness_dict (all players) = {fitness_dict}")
 
         # Seleziono solo i migliori
         pop = select_best(combined, fitness_dict, popsize)
         log.info(f"Pop after select_best = {pop}")
-        log.info(f"Best Pop Names = {[getSPName(individual) for individual in pop]}")
+        log.info(f"Names after select_best = {[getSPName(individual) for individual in pop]}")
 
     return pop
 
@@ -283,13 +281,13 @@ if __name__ == "__main__":
     verbose = True
 
     # Parametri dell'algoritmo genetico
-    popsize = 2
-    num_children = 10
-    gens = 10
+    popsize = CONFIG["gen_alg_popsize"]
+    num_children = CONFIG["gen_alg_num_children"]
+    gens = CONFIG["gen_alg_num_generations"]
 
     # Parametri per la probabilità di mutazione
-    delta = 0.4  # Variazione iniziale (possibilmente alta)
-    sigma = 0.3 # Variazione durante le iterazioni (moderata)
+    delta = CONFIG["gen_alg_delta"]  # Variazione iniziale (possibilmente alta)
+    sigma = CONFIG["gen_alg_sigma"] # Variazione durante le iterazioni (moderata)
 
     # Run GA
     final_pop = run(
@@ -303,9 +301,8 @@ if __name__ == "__main__":
 
     if verbose:
         log.info("=== FINAL pop ===")
-
-
-        log.info(final_pop)
+        log.info(f"Final pop = {final_pop}")
+        log.info(f"Final pop names = {[getSPName(player) for player in final_pop]}")
 
     with open(final_population_path, "w") as f:
         json.dump(final_pop, f, indent=2)
