@@ -34,6 +34,7 @@ log = setup_logger(__name__)
 base_superplayers_path = CONFIG["gen_alg_base_superplayers_path"]
 superplayers_path = CONFIG["gen_alg_superplayers_path"]
 final_population_path = CONFIG["gen_alg_final_population_path"]
+tournament_result_history_file = CONFIG["tournament_result_history_file"]
 
 last_id = CONFIG["gen_alg_popsize"] + 1 # GLOBAL SP ID COUNTER
 
@@ -207,33 +208,17 @@ def getFitness(pop, mock=False):
     tournament.run_tournament(CONFIG["superplayers_file"], mock)
 
     # Calcola l'elo 
-    fitness_dict = elo.calculate_elo_ratings_sorted(CONFIG["tournament_result_file"])
+    fitness_dict = elo.calculate_elo_ratings_sorted(CONFIG["tournament_result_by_generation_file"])
 
     # Restituisci la fitness {name : elo}
     return fitness_dict
 
-import os
 
-def empty_results_csv(file_path):
-
-    try:
-        with open(file_path, 'r', encoding='utf-8') as f:
-            header = f.readline()
-
-        with open(file_path, 'w', encoding='utf-8') as f:
-            f.write(header)
-
-        log.debug(f"File '{file_path}' svuotato con successo (header mantenuto).")
-
-    except FileNotFoundError:
-        log.error(f"Errore: Il file '{file_path}' non esiste.")
-    except Exception as e:
-        log.error(f"Si è verificato un errore: {e}")
 
 
 
 def run(pop, gens, popsize, num_children, probability, verbose=False):
-    empty_results_csv(CONFIG["tournament_result_file"]) #SVUOTA il file dei risultati ogni volta che l'algoritmo viene attivato
+    tournament.empty_results_csv(tournament_result_history_file) #SVUOTA il file dei risultati storici ogni volta che l'algoritmo viene attivato
     fitness_dict = getFitness(pop, True) # True = Mock
 
     for gen in range(gens):
@@ -266,7 +251,7 @@ def run(pop, gens, popsize, num_children, probability, verbose=False):
         # Nota: dato che sono già ordinati posso rimuovere gli "extra"
 
         fitness_dict = getFitness(combined, True)
-        log.info(f"Fitness_dict (all players) = {fitness_dict}")
+        log.info(f"Fitness_dict (current generation) = {fitness_dict}")
 
         # Seleziono solo i migliori
         pop = select_best(combined, fitness_dict, popsize)
@@ -303,6 +288,7 @@ if __name__ == "__main__":
         log.info("=== FINAL pop ===")
         log.info(f"Final pop = {final_pop}")
         log.info(f"Final pop names = {[getSPName(player) for player in final_pop]}")
+        log.info(f"Fitness dict (history of all players) = {elo.calculate_elo_ratings_sorted(tournament_result_history_file)}")
 
     with open(final_population_path, "w") as f:
         json.dump(final_pop, f, indent=2)

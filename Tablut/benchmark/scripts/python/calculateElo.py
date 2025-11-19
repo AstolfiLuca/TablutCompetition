@@ -100,4 +100,4 @@ def calculate_elo_ratings_sorted(file_path):
 
 
 if __name__ == "__main__":
-    print(calculate_elo_ratings_sorted(CONFIG["tournament_result_file"]))
+    print(calculate_elo_ratings_sorted(CONFIG["tournament_result_history_file"]))

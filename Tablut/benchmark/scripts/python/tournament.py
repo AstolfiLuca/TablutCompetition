@@ -257,20 +257,38 @@ def store_result_of_match(sp1,sp2,mock=False):
         sp2_points = 2-sp1_points
 
         match_result_row = (timestamp, sp1.super_player_name, sp2.super_player_name, sp1_points,sp2_points)
-
-        write_on_csv(CONFIG["tournament_result_file"], headers, match_result_row)
+        write_results(headers, match_result_row)
     else:
         rand_points = random.choice([0, 0.5, 1, 1.5, 2])
         sp1_points = rand_points
         sp2_points = 2-rand_points
         match_result_row = (timestamp, sp1.super_player_name, sp2.super_player_name, sp1_points,sp2_points)
-        write_on_csv(CONFIG["tournament_result_file"], headers, match_result_row)
+        write_results(headers, match_result_row)
 
+def write_results(headers, match_result_row):
+    write_on_csv(CONFIG["tournament_result_by_generation_file"], headers, match_result_row)
+    write_on_csv(CONFIG["tournament_result_history_file"], headers, match_result_row)
 
+def empty_results_csv(file_path):
+
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            header = f.readline()
+
+        with open(file_path, 'w', encoding='utf-8') as f:
+            f.write(header)
+
+        log.debug(f"File '{file_path}' svuotato con successo (header mantenuto).")
+
+    except FileNotFoundError:
+        log.error(f"Errore: Il file '{file_path}' non esiste.")
+    except Exception as e:
+        log.error(f"Si è verificato un errore: {e}")
 
 def run_tournament(superplayers_file, mock=False):
     list_superplayers = load_superplayers_from_file(superplayers_file)
     delete_previous_logs(CONFIG["process_log_folder"])
+    empty_results_csv(CONFIG["tournament_result_by_generation_file"])
     for sp1, sp2 in itertools.combinations(list_superplayers, 2):
         log.info(f"Match: {sp1.super_player_name} vs {sp2.super_player_name}")
         if not mock:
