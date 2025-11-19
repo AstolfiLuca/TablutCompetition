@@ -217,9 +217,9 @@ def getFitness(pop, mock=False):
 
 
 
-def run(pop, gens, popsize, num_children, probability, verbose=False):
+def run(pop, gens, popsize, num_children, probability, verbose=False, mock=False):
     tournament.empty_results_csv(tournament_result_history_file) #SVUOTA il file dei risultati storici ogni volta che l'algoritmo viene attivato
-    fitness_dict = getFitness(pop, True) # True = Mock
+    fitness_dict = getFitness(pop, mock) # True = Mock
 
     for gen in range(gens):
         if verbose:
@@ -250,7 +250,7 @@ def run(pop, gens, popsize, num_children, probability, verbose=False):
         # Calcolo la fitness ({name : elo}) degli individui della popolazione 
         # Nota: dato che sono già ordinati posso rimuovere gli "extra"
 
-        fitness_dict = getFitness(combined, True)
+        fitness_dict = getFitness(combined, mock)
         log.info(f"Fitness_dict (current generation) = {fitness_dict}")
 
         # Seleziono solo i migliori
@@ -274,6 +274,8 @@ if __name__ == "__main__":
     delta = CONFIG["gen_alg_delta"]  # Variazione iniziale (possibilmente alta)
     sigma = CONFIG["gen_alg_sigma"] # Variazione durante le iterazioni (moderata)
 
+    mock = CONFIG["gen_alg_mock"] #Per mockare le partite
+
     # Run GA
     final_pop = run(
         pop=generate_base(popsize, delta),
@@ -281,7 +283,8 @@ if __name__ == "__main__":
         popsize=popsize,
         num_children=num_children,
         probability=sigma,
-        verbose=verbose
+        verbose=verbose,
+        mock=mock
     )
 
     if verbose:
