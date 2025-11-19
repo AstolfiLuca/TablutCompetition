@@ -184,14 +184,12 @@ def generate_new_members(pop, fitness_dict, num_children, probability, current_g
 
 def select_best(pop, fitness_dict, popsize):
     new_pop = []
-    names_of_alive_players = [getSPName(player) for player in pop]
 
+    for player_name in fitness_dict:
+        new_pop.append(getPlayerByName(player_name, pop))
+        if len(new_pop) == popsize:
+            break
 
-    for name in fitness_dict:
-        if name in names_of_alive_players:
-            new_pop.append(getPlayerByName(name, pop))
-            if len(new_pop) == popsize:
-                break
     return new_pop
 
 def getPlayerByName(name, pop):
