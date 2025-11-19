@@ -75,7 +75,7 @@ def getNewIndividualName(individual):
     last_id += 1
 
 
-def  mutate(individual, probability, current_gen=0, gens=1): #TODO funziona anche senza copy?
+def mutate(individual, probability, current_gen=0, gens=1):
     prob = probability * (1 - float(current_gen) / gens) # Mutazione decrescente (annealing)
 
     W_H = getSPHeuristicsWhite(individual)
@@ -210,9 +210,6 @@ def getFitness(pop, mock=False):
 
     # Restituisci la fitness {name : elo}
     return fitness_dict
-
-
-
 
 
 def run(pop, gens, popsize, num_children, probability, verbose=False, mock=False):
