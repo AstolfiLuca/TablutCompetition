@@ -1,7 +1,4 @@
 # config.yaml
-superplayers_file: ../../players/superplayers.json
-tournament_result_history_file: results/match_results_history.csv
-tournament_result_by_generation_file: results/match_results_by_generation.csv
 uber_jar: &UBER_JAR ../../target/tablut_uber_jar.jar
 process_log_folder: ./logs
 
@@ -18,6 +15,11 @@ client:
 
 starting_elo: 1500
 k_factor: 32
+
+tournament_result_history_file: results/match_results_history.csv
+tournament_result_by_generation_file: results/match_results_by_generation.csv
+single_match_result_file: results/single_match_results.csv
+single_match_superplayers: ../../players/single_match_superplayers.json
 
 gen_alg_popsize: 2
 gen_alg_num_children: 2

@@ -203,7 +203,7 @@ def getFitness(pop, mock=False):
         json.dump(pop, f, indent=2)
 
     # Esegui il torneo
-    tournament.run_tournament(CONFIG["superplayers_file"], mock)
+    tournament.run_tournament(superplayers_path, mock)
 
     # Calcola l'elo 
     fitness_dict = elo.calculate_elo_ratings_sorted(CONFIG["tournament_result_by_generation_file"])
