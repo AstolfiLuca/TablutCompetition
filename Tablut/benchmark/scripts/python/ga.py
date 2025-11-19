@@ -177,9 +177,7 @@ def generate_new_members(pop, fitness_dict, num_children, probability, current_g
         parent1 = getParent(pop, fitness_dict)
         parent2 = getParent(pop, fitness_dict)
         child = crossover(parent1, parent2)
-        log.info(f"Child before mutation: {child}")
         mutate(child, probability, current_gen, gens)
-        log.info(f"Child after mutation: {child}")
 
         new_members.append(child)
 
@@ -187,12 +185,20 @@ def generate_new_members(pop, fitness_dict, num_children, probability, current_g
 
 def select_best(pop, fitness_dict, popsize):
     new_pop = []
+    names_of_alive_players = [getSPName(player) for player in pop]
 
-    for individual in pop:
-        if getSPName(individual) in fitness_dict.keys():
-            new_pop.append(individual)
-    
+
+    for name in fitness_dict:
+        if name in names_of_alive_players:
+            new_pop.append(getPlayerByName(name, pop))
+            if len(new_pop) == popsize:
+                break
     return new_pop
+
+def getPlayerByName(name, pop):
+    for player in pop:
+        if getSPName(player) == name:
+            return player
 
 def getFitness(pop, mock=False):
     # Salva popolazione
@@ -256,16 +262,18 @@ def run(pop, gens, popsize, num_children, probability, verbose=False):
         # Unisco i nuovi membri ai precedenti
         combined = pop + new_members
         log.info(f"Combined = {combined}")
+        log.info(f"Combined Names = {[getSPName(individual) for individual in combined]}")
 
         # Calcolo la fitness ({name : elo}) degli individui della popolazione 
         # Nota: dato che sono già ordinati posso rimuovere gli "extra"
 
-        fitness_dict = dict(list(getFitness(combined, True).items())[:popsize])
-        log.info(f"Fitness_dict of combined = {fitness_dict}")
+        fitness_dict = getFitness(combined, True)
+        log.info(f"Fitness_dict of all = {fitness_dict}")
 
         # Seleziono solo i migliori
         pop = select_best(combined, fitness_dict, popsize)
         log.info(f"Pop after select_best = {pop}")
+        log.info(f"Best Pop Names = {[getSPName(individual) for individual in pop]}")
 
     return pop
 
@@ -276,7 +284,7 @@ if __name__ == "__main__":
 
     # Parametri dell'algoritmo genetico
     popsize = 2
-    num_children = 20
+    num_children = 10
     gens = 10
 
     # Parametri per la probabilità di mutazione
