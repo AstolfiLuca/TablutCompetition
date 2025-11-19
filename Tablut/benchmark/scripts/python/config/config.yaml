@@ -7,12 +7,12 @@ process_log_folder: ./logs
 server:
   jar: *UBER_JAR
   main_class: it.unibo.ai.didattica.competition.tablut.server.Server
-  parameters: ["-g", "-t", "2000"]
+  parameters: ["-t", "2000"]
   log_file: server.logs
 
 client:
   jar: *UBER_JAR
-  timeout: 5
+  timeout: 1
   server_ip: localhost
 
 starting_elo: 1500

@@ -2,6 +2,7 @@ import csv
 import glob
 import itertools
 import json
+import random
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Dict, Any
@@ -227,45 +228,54 @@ def write_on_csv(filename, headers, row):
 
 
 
-def store_result_of_match(sp1,sp2):
-    sp1_white_vs_sp2_black=lookup_game_result(sp1.player_w,sp2.player_b)
-    sp1_black_vs_sp2_white=lookup_game_result(sp2.player_w,sp1.player_b)
-    sp1_points = 0
-    if sp1_white_vs_sp2_black == 'WW':
-        sp1_points += 1
-    elif sp1_white_vs_sp2_black == 'D':
-        sp1_points += 0.5
-    elif sp1_white_vs_sp2_black == 'BW':
-        sp1_points += 0
-    else:
-        log.error("Impossibile leggere il risultato")
-        raise Exception("Impossibile leggere il risultato")
-    if sp1_black_vs_sp2_white == 'WW':
-        sp1_points += 0
-    elif sp1_black_vs_sp2_white == 'D':
-        sp1_points += 0.5
-    elif sp1_black_vs_sp2_white == 'BW':
-        sp1_points += 1
-    else:
-        log.error("Impossibile leggere il risultato")
-        raise Exception("Impossibile leggere il risultato")
-    sp2_points = 2-sp1_points
+def store_result_of_match(sp1,sp2,mock=False):
+    headers = ["Timestamp", "SuperPlayer_1", "SuperPlayer_2", "Punteggio_SP1", "Punteggio_SP2"]
     format = "%d-%m-%Y %H:%M"
     timestamp = datetime.now().strftime(format)
-    match_result_row = (timestamp, sp1.super_player_name, sp2.super_player_name, sp1_points,sp2_points)
-    headers = ["Timestamp", "SuperPlayer_1", "SuperPlayer_2", "Punteggio_SP1", "Punteggio_SP2"]
+    if not mock:
+        sp1_white_vs_sp2_black=lookup_game_result(sp1.player_w,sp2.player_b)
+        sp1_black_vs_sp2_white=lookup_game_result(sp2.player_w,sp1.player_b)
+        sp1_points = 0
+        if sp1_white_vs_sp2_black == 'WW':
+            sp1_points += 1
+        elif sp1_white_vs_sp2_black == 'D':
+            sp1_points += 0.5
+        elif sp1_white_vs_sp2_black == 'BW':
+            sp1_points += 0
+        else:
+            log.error("Impossibile leggere il risultato")
+            raise Exception("Impossibile leggere il risultato")
+        if sp1_black_vs_sp2_white == 'WW':
+            sp1_points += 0
+        elif sp1_black_vs_sp2_white == 'D':
+            sp1_points += 0.5
+        elif sp1_black_vs_sp2_white == 'BW':
+            sp1_points += 1
+        else:
+            log.error("Impossibile leggere il risultato")
+            raise Exception("Impossibile leggere il risultato")
+        sp2_points = 2-sp1_points
 
-    write_on_csv(CONFIG["tournament_result_file"], headers, match_result_row)
+        match_result_row = (timestamp, sp1.super_player_name, sp2.super_player_name, sp1_points,sp2_points)
+
+        write_on_csv(CONFIG["tournament_result_file"], headers, match_result_row)
+    else:
+        rand_points = random.choice([0, 0.5, 1, 1.5, 2])
+        sp1_points = rand_points
+        sp2_points = 2-rand_points
+        match_result_row = (timestamp, sp1.super_player_name, sp2.super_player_name, sp1_points,sp2_points)
+        write_on_csv(CONFIG["tournament_result_file"], headers, match_result_row)
 
 
 
-def run_tournament(superplayers_file):
+def run_tournament(superplayers_file, mock=False):
     list_superplayers = load_superplayers_from_file(superplayers_file)
     delete_previous_logs(CONFIG["process_log_folder"])
     for sp1, sp2 in itertools.combinations(list_superplayers, 2):
         log.info(f"Match: {sp1.super_player_name} vs {sp2.super_player_name}")
-        match_bw_superplayers(sp1, sp2)
-        store_result_of_match(sp1,sp2)
+        if not mock:
+            match_bw_superplayers(sp1, sp2)
+        store_result_of_match(sp1,sp2,mock)
     log.info("Torneo terminato")
 
 

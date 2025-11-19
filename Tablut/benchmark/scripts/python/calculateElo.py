@@ -99,3 +99,5 @@ def calculate_elo_ratings_sorted(file_path):
     return final_ratings_dict
 
 
+if __name__ == "__main__":
+    print(calculate_elo_ratings_sorted(CONFIG["tournament_result_file"]))

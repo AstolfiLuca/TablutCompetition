@@ -432,7 +432,7 @@ public class Server implements Runnable {
 			//TODO il vlaore originale massimo per il nome dei player era 10, alzato temporaneamente per test
 			for (int i = 0; i < whiteName.length() && i < 30; i++) {
 				char c = whiteName.charAt(i);
-				if (Character.isAlphabetic(c) || Character.isDigit(c))
+				if (Character.isAlphabetic(c) || Character.isDigit(c) || c == '_')
 					temp += c;
 			}
 			whiteName = temp;
@@ -493,7 +493,7 @@ public class Server implements Runnable {
 			//TODO il vlaore originale massimo per il nome dei player era 10, alzato temporaneamente per test
 			for (int i = 0; i < blackName.length() && i < 30; i++) {
 				char c = blackName.charAt(i);
-				if (Character.isAlphabetic(c) || Character.isDigit(c))
+				if (Character.isAlphabetic(c) || Character.isDigit(c) || c == '_')
 					temp += c;
 			}
 			System.out.println("Black player name:\t" + blackName);

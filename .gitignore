@@ -55,3 +55,6 @@ dkms.conf
 **.idea/**
 
 venv
+/logs/
+/garbage/
+/out/
