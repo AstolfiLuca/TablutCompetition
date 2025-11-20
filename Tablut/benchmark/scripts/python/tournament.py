@@ -17,7 +17,7 @@ log = setup_logger(__name__)
 @dataclass
 class Player:
     name: str
-    client_name: str
+    clientName: str
     role: str
     heuristics: Dict[str, float]
 
@@ -25,7 +25,7 @@ class Player:
     def from_dict(data: Dict[str, Any]) -> 'Player':
         return Player(
             name=data['name'],
-            client_name=data['clientName'],
+            clientName=data['clientName'],
             role=data['role'],
             heuristics=data['heuristics']
         )
@@ -65,12 +65,15 @@ def clear_old_logs(folder):
 
 
 def load_superplayers_from_file(filename):
-    vmessage(f"Tentativo di lettura dal file: {filename}", debug=True)
 
-    with open(filename, 'r') as f:
-        superplayers = json.load(f)
-
-    return superplayers
+    log.debug(f"Tentativo di lettura dal file: {filename}")
+    try:
+        with open(filename, 'r', encoding='utf-8') as f:
+            data_list = json.load(f)
+        return [Superplayer.from_dict(item) for item in data_list]
+    except Exception as e:
+        log.error(f"ERRORE sconosciuto durante la lettura: {e}")
+        return []
 
 
 def run_server():
@@ -101,21 +104,21 @@ def run_server():
 def run_client(player):
     os.makedirs(CONFIG["process_log_folder"], exist_ok=True)
 
-    log_file_path = os.path.join(CONFIG["process_log_folder"], player["name"] + ".logs")
+    log_file_path = os.path.join(CONFIG["process_log_folder"], player.name + ".logs")
 
     cmd = [
         "java",
         "-cp",
         CONFIG["client"]["jar"],
-        player["clientName"],
-        player["role"],
+        player.clientName,
+        player.role,
         str(CONFIG["client"]["timeout"]),
         CONFIG["client"]["server_ip"],
-        player["name"],
-        json.dumps(player["heuristics"])
+        player.name,
+        json.dumps(player.heuristics)
     ]
 
-    vmessage(f"Avvio del client {player['name']} con timeout {CONFIG['client']['timeout']} secondi... Log su: {log_file_path}", debug=True)
+    vmessage(f"Avvio del client {player.name} con timeout {CONFIG['client']['timeout']} secondi... Log su: {log_file_path}", debug=True)
 
     with open(log_file_path, "a") as log_file:
         process = subprocess.Popen(
@@ -134,11 +137,11 @@ def match_bw_players(p1, p2):
     server_process = run_server()
     time.sleep(1)
 
-    vmessage(f"Avvio del client {p1['role']} con nome {p1['name']}...", debug=True)
+    vmessage(f"Avvio del client {p1.role} con nome {p1.name}...", debug=True)
     client1_process = run_client(p1)
     time.sleep(1)
 
-    vmessage(f"Avvio del client {p2['role']} con nome {p2['name']}...", debug=True)
+    vmessage(f"Avvio del client {p2.role} con nome {p2.name}...", debug=True)
     client2_process = run_client(p2)
     time.sleep(1)
 
@@ -149,11 +152,11 @@ def match_bw_players(p1, p2):
     vmessage("Tutti i processi del game hanno terminato", debug=True)
 
 def match_bw_superplayers(sp1, sp2):
-    vmessage(f"Game_1: WHITE: {sp1['playerW']['name']} vs BLACK: {sp2['playerB']['name']}")
-    match_bw_players(sp1["playerW"], sp2["playerB"])
+    vmessage(f"Game_1: WHITE: {sp1.playerW.name} vs BLACK: {sp2.playerB.name}")
+    match_bw_players(sp1.playerW, sp2.playerB)
 
-    vmessage(f"Game_2: WHITE: {sp2['playerW']['name']} vs BLACK: {sp1['playerB']['name']}")
-    match_bw_players(sp1["playerB"], sp2["playerW"])
+    vmessage(f"Game_2: WHITE: {sp2.playerW.name} vs BLACK: {sp1.playerB.name}")
+    match_bw_players(sp1.playerB, sp2.playerW)
 
 
 def write_on_csv(filename, headers, row):
@@ -170,7 +173,7 @@ def write_on_csv(filename, headers, row):
 def lookup_match_results(playerW, playerB):
     pattern = os.path.join(
         CONFIG["process_log_folder"],
-        f"_{playerW['name']}_vs_{playerB['name']}_*"
+        f"_{playerW.name}_vs_{playerB.name}_*"
     )
 
     files_found = glob.glob(pattern)
@@ -191,8 +194,8 @@ def store_match_results(sp1, sp2, mock=False):
     format = "%d-%m-%Y %H:%M"
     timestamp = datetime.now().strftime(format)
     if not mock:
-        res1 = lookup_match_results(sp1["playerW"], sp2["playerB"])
-        res2 = lookup_match_results(sp2["playerW"], sp1["playerB"])
+        res1 = lookup_match_results(sp1.playerW, sp2.playerB)
+        res2 = lookup_match_results(sp2.playerW, sp1.playerB)
 
         sp1_points = 0
 
@@ -218,13 +221,13 @@ def store_match_results(sp1, sp2, mock=False):
                 log.error(f"Risultato non valido: {res2}")
                 raise ValueError("Risultato non valido")
         sp2_points = 2-sp1_points
-        match_result_row = (timestamp, sp1['superPlayerName'], sp2['superPlayerName'], sp1_points,sp2_points)
+        match_result_row = (timestamp, sp1.superPlayerName, sp2.superPlayerName, sp1_points,sp2_points)
 
     else:
         rand_points = random.choice([0, 0.5, 1, 1.5, 2])
         sp1_points = rand_points
         sp2_points = 2-rand_points
-        match_result_row = (timestamp, sp1['superPlayerName'], sp2['superPlayerName'], sp1_points,sp2_points)
+        match_result_row = (timestamp, sp1.superPlayerName, sp2.superPlayerName, sp1_points,sp2_points)
 
     if "single_match" in CONFIG and CONFIG["single_match"]:
         write_on_csv(CONFIG["single_match_result_file"], headers, match_result_row)
@@ -244,7 +247,7 @@ def run_tournament(superplayers_file, mock=False):
 
     # Creo le coppie ed inizio il torneo
     for sp1, sp2 in itertools.combinations(superplayers, 2):
-        log.info(f"Match: {sp1['superPlayerName']} vs {sp2['superPlayerName']}")
+        log.info(f"Match: {sp1.superPlayerName} vs {sp2.superPlayerName}")
 
         if not mock:
             match_bw_superplayers(sp1, sp2)
