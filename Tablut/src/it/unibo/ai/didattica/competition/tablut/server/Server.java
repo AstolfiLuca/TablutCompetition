@@ -52,6 +52,16 @@ public class Server implements Runnable {
 	protected boolean enableGui;
 
 	/**
+	 * Port used to communicate with white player
+	 */
+	private int whitePort;
+
+	/**
+	 * Port used to communicate with black player
+	 */
+	private int blackPort;
+
+	/**
 	 * JSON string used to communicate
 	 */
 	private String theGson;
@@ -93,7 +103,7 @@ public class Server implements Runnable {
 	 */
 	protected int gameC;
 
-	public Server(int timeout, int cacheSize, int numErrors, int repeated, int game, boolean gui) {
+	public Server(int timeout, int cacheSize, int numErrors, int repeated, int game, boolean gui, int whitePort, int blackPort) {
 		this.gameC = game;
 		this.enableGui = gui;
 		this.time = timeout;
@@ -101,6 +111,8 @@ public class Server implements Runnable {
 		this.errors = numErrors;
 		this.cacheSize = cacheSize;
 		this.gson = new Gson();
+		this.whitePort = whitePort;
+		this.blackPort = blackPort;
 	}
 
 	public void initializeGUI(State state) {
@@ -125,6 +137,9 @@ public class Server implements Runnable {
 		int gameChosen = 4;
 		boolean enableGui = true;
 		String replayFilePath = null;
+		// Default ports to communicate with
+		int whitePort = Configuration.whitePort;
+		int blackPort = Configuration.blackPort;
 
 		CommandLineParser parser = new DefaultParser();
 
@@ -137,6 +152,8 @@ public class Server implements Runnable {
 		options.addOption("r","game rules", true, "game rules must be an integer; 1 for Tablut, 2 for Modern, 3 for Brandub, 4 for Ashton; default: 4");
 		options.addOption("g","enableGUI", false, "enableGUI if option is present");
 		options.addOption("R", "replay", true, "replay mode: specify txt file containing stdout from game and replay the moves");
+		options.addOption("wp", "white port", true, "port used by white player");
+		options.addOption("bp", "black port", true, "port used by black player");
 
 		HelpFormatter formatter = new HelpFormatter();
 		formatter.printHelp("java Server", options);
@@ -221,6 +238,31 @@ public class Server implements Runnable {
 				}
 			}
 
+			if (cmd.hasOption("wp")){
+				try {
+					whitePort = Integer.parseInt(cmd.getOptionValue("wp"));
+					if (whitePort < 1 || whitePort > 65535) {
+						System.out.println("White port not allowed!");
+						System.exit(1);
+					}
+				} catch (Exception e) {
+					System.out.println("The white port is not valid!");
+					System.exit(1);
+				}
+			}
+
+			if (cmd.hasOption("bp")){
+				try{
+					blackPort = Integer.parseInt(cmd.getOptionValue("bp"));
+					if (blackPort < 1 || blackPort > 65535) {
+						System.out.println("Black port not allowed!");
+						System.exit(1);
+					}
+				} catch (Exception e) {
+					System.out.println("The black port is not valid!");
+					System.exit(1);
+				}
+			}
 		}catch (ParseException exp){
 			System.out.println( "Unexpected exception:" + exp.getMessage() );
 		}
@@ -228,9 +270,9 @@ public class Server implements Runnable {
 		// Start the server
 		Server engine;
 		if (replayFilePath == null) {
-			engine = new Server(time, moveCache, errors, repeated, gameChosen, enableGui);
+			engine = new Server(time, moveCache, errors, repeated, gameChosen, enableGui, whitePort, blackPort);
 		} else {
-			engine = new ReplayServer(replayFilePath, moveCache, errors, repeated, gameChosen, enableGui);
+			engine = new ReplayServer(replayFilePath, moveCache, errors, repeated, gameChosen, enableGui, whitePort, blackPort);
 		}
 		engine.run();
 	}
@@ -375,8 +417,8 @@ public class Server implements Runnable {
 
 		// ESTABLISH CONNECTIONS AND NAME READING
 		try {
-			this.socketWhite = new ServerSocket(Configuration.whitePort);
-			this.socketBlack = new ServerSocket(Configuration.blackPort);
+			this.socketWhite = new ServerSocket(this.whitePort);
+			this.socketBlack = new ServerSocket(this.blackPort);
 			
 
 			// ESTABLISHING CONNECTION

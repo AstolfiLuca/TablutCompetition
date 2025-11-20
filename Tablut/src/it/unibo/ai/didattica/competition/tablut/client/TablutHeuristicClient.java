@@ -25,37 +25,38 @@ public abstract class TablutHeuristicClient extends TablutClient {
             int timeout,
             String ipAddress,
             String weights,
-            AdversarialSearch<State, Action> searchStrategy
+            AdversarialSearch<State, Action> searchStrategy,
+            int port
     ) throws UnknownHostException, IOException {
-        super(player, name, timeout, ipAddress);
+        super(player, name, timeout, ipAddress, port);
         this.searchStrategy = searchStrategy;
         parseOptionalWeights(weights);
     }
 
-    public TablutHeuristicClient(String player, String name, int timeout, String ipAddress, String weights) throws UnknownHostException, IOException {
-        super(player, name, timeout, ipAddress);
+    public TablutHeuristicClient(String player, String name, int timeout, String ipAddress, String weights, int port) throws UnknownHostException, IOException {
+        super(player, name, timeout, ipAddress, port);
         parseOptionalWeights(weights);
     }
 
-    public TablutHeuristicClient(String player, String name, int timeout, String ipAddress, AdversarialSearch<State, Action> searchStrategy) throws UnknownHostException, IOException {
-        super(player, name, timeout, ipAddress);
+    public TablutHeuristicClient(String player, String name, int timeout, String ipAddress, AdversarialSearch<State, Action> searchStrategy, int port) throws UnknownHostException, IOException {
+        super(player, name, timeout, ipAddress, port);
         this.searchStrategy = searchStrategy;
     }
 
-    public TablutHeuristicClient(String player, String name, int timeout, String ipAddress) throws UnknownHostException, IOException {
-        super(player, name, timeout, ipAddress);
+    public TablutHeuristicClient(String player, String name, int timeout, String ipAddress, int port) throws UnknownHostException, IOException {
+        super(player, name, timeout, ipAddress, port);
     }
 
-    public TablutHeuristicClient(String player, String name, int timeout) throws UnknownHostException, IOException {
-        super(player, name, timeout);
+    public TablutHeuristicClient(String player, String name, int timeout, int port) throws UnknownHostException, IOException {
+        super(player, name, timeout, port);
     }
 
-    public TablutHeuristicClient(String player, String name) throws UnknownHostException, IOException {
-        super(player, name);
+    public TablutHeuristicClient(String player, String name, int port) throws UnknownHostException, IOException {
+        super(player, name, port);
     }
 
-    public TablutHeuristicClient(String player, String name, String ipAddress) throws UnknownHostException, IOException {
-        super(player, name, ipAddress);
+    public TablutHeuristicClient(String player, String name, String ipAddress, int port) throws UnknownHostException, IOException {
+        super(player, name, ipAddress, port);
     }
 
     private void parseOptionalWeights(String weights) {

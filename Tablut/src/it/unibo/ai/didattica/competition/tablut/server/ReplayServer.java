@@ -26,8 +26,8 @@ public class ReplayServer extends Server {
 	protected int timeBetweenTurns = 1000; // ms
 	protected boolean initializedGui = false;
 
-	public ReplayServer(String replayFilePath, int cacheSize, int numErrors, int repeated, int game, boolean gui) {
-		super(Integer.MAX_VALUE, cacheSize, numErrors, repeated, game, gui);
+	public ReplayServer(String replayFilePath, int cacheSize, int numErrors, int repeated, int game, boolean gui, int whitePort, int blackPort) {
+		super(Integer.MAX_VALUE, cacheSize, numErrors, repeated, game, gui, whitePort, blackPort);
 		this.replayFilePath = replayFilePath;
 	}
 

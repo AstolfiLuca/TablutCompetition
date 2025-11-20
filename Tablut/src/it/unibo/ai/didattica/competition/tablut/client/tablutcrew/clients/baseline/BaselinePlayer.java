@@ -8,6 +8,7 @@ import it.unibo.ai.didattica.competition.tablut.client.tablutcrew.search.Baselin
 import it.unibo.ai.didattica.competition.tablut.domain.Action;
 import it.unibo.ai.didattica.competition.tablut.domain.GameAshtonTablut;
 import it.unibo.ai.didattica.competition.tablut.domain.State;
+import it.unibo.ai.didattica.competition.tablut.util.Configuration;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
@@ -20,42 +21,26 @@ public class BaselinePlayer extends TablutHeuristicClient {
     public final static int CACHED_MOVES_ALLOWED = -1;
     public final static String LOGS_FOLDER = "logs";
 
-    public BaselinePlayer(String player, String name, int timeout, String ipAddress, String weights, AdversarialSearch<State, Action> searchStrategy) throws UnknownHostException, IOException {
-        super(player, name, timeout, ipAddress, weights, searchStrategy);
+    public BaselinePlayer(String player, String name, int timeout, String ipAddress, String weights, AdversarialSearch<State, Action> searchStrategy, int port) throws UnknownHostException, IOException {
+        super(player, name, timeout, ipAddress, weights, searchStrategy, port);
     }
 
-    public BaselinePlayer(String player, String name, int timeout, String ipAddress, String weights) throws UnknownHostException, IOException {
-        super(player, name, timeout, ipAddress, weights);
+    public BaselinePlayer(String player, String name, int timeout, String ipAddress, String weights, int port) throws UnknownHostException, IOException {
+        super(player, name, timeout, ipAddress, weights, port);
         GameAshtonTablut game = new GameAshtonTablut(REPEATED_MOVES_ALLOWED, CACHED_MOVES_ALLOWED, LOGS_FOLDER, "White", "Black");
         this.searchStrategy = new BaselineSearch(game, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, timeout, this.weights);
     }
 
-    public BaselinePlayer(String player, String name, int timeout, String ipAddress, AdversarialSearch<State, Action> searchStrategy, Double ...weights) throws UnknownHostException, IOException {
-        super(player, name, timeout, ipAddress, searchStrategy);
-        initializeWeights();
-        updateWeights(weights);
-        GameAshtonTablut game = new GameAshtonTablut(REPEATED_MOVES_ALLOWED, CACHED_MOVES_ALLOWED, LOGS_FOLDER, "White", "Black");
-        this.searchStrategy = new BaselineSearch(game, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, timeout, this.weights);
+    public BaselinePlayer(String player, String name, int timeout, int port) throws UnknownHostException, IOException {
+        super(player, name, timeout, port);
     }
 
-    public BaselinePlayer(String player, String name, int timeout, String ipAddress, Double ...weights) throws UnknownHostException, IOException {
-        super(player, name, timeout, ipAddress);
-        initializeWeights();
-        updateWeights(weights);
-        GameAshtonTablut game = new GameAshtonTablut(REPEATED_MOVES_ALLOWED, CACHED_MOVES_ALLOWED, LOGS_FOLDER, "White", "Black");
-        this.searchStrategy = new BaselineSearch(game, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, timeout, this.weights);
+    public BaselinePlayer(String player, String name, int port) throws UnknownHostException, IOException {
+        super(player, name, port);
     }
 
-    public BaselinePlayer(String player, String name, int timeout) throws UnknownHostException, IOException {
-        super(player, name, timeout);
-    }
-
-    public BaselinePlayer(String player, String name) throws UnknownHostException, IOException {
-        super(player, name);
-    }
-
-    public BaselinePlayer(String player, String name, String ipAddress) throws UnknownHostException, IOException {
-        super(player, name, ipAddress);
+    public BaselinePlayer(String player, String name, String ipAddress, int port) throws UnknownHostException, IOException {
+        super(player, name, ipAddress, port);
     }
 
     public static void main(String[] args) throws UnknownHostException, IOException {
@@ -64,6 +49,7 @@ public class BaselinePlayer extends TablutHeuristicClient {
         String ipAddress = "localhost";
         String weights = null;
         int timeout = 60;
+        int port;
 
         if (args.length < 1) {
             System.out.println("You must specify which player you are (WHITE or BLACK)");
@@ -89,23 +75,19 @@ public class BaselinePlayer extends TablutHeuristicClient {
             weights = args[4];
             System.out.println("Weights: " + weights);
         }
+        boolean isWhitePlayer = role.equalsIgnoreCase("white");
+        port = isWhitePlayer ? Configuration.whitePort : Configuration.blackPort;
+        if (args.length > 5) {
+            try {
+                port = Integer.parseInt(args[5]);
+            } catch (Exception e) {
+                System.out.println("Invalid port: " + args[5]);
+                System.exit(-1);
+            }
+        }
         System.out.println("Selected client: " + args[0]);
 
-        BaselinePlayer client = new BaselinePlayer(role, name, timeout, ipAddress, weights);
+        BaselinePlayer client = new BaselinePlayer(role, name, timeout, ipAddress, weights, port);
         client.run();
-    }
-
-    private void initializeWeights() {
-        this.keys = this.getPlayer() == State.Turn.BLACK ? BlackWeights.getAllKeys() : WhiteWeights.getAllKeys();
-        this.weights = this.getPlayer() == State.Turn.BLACK ? BlackWeights.getDefaultWeights() : WhiteWeights.getDefaultWeights();
-    }
-
-    private void updateWeights(Double[] weights) {
-        int i = 0;
-        // Store the passed weights
-        while (i < weights.length && i < keys.size()) {
-            this.weights.put(keys.get(i), weights[i]);
-            i += 1;
-        }
     }
 }
