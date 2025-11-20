@@ -247,12 +247,11 @@ def run_tournament(superplayers_file, mock=False):
 
     # Creo le coppie ed inizio il torneo
     for sp1, sp2 in itertools.combinations(superplayers, 2):
-        log.info(f"Match: {sp1.superPlayerName} vs {sp2.superPlayerName}")
-
-        if not mock:
-            match_bw_superplayers(sp1, sp2)
-
-        store_match_results(sp1, sp2, mock)
+        if not (sp1.superPlayerName.endswith('ghost') and sp2.superPlayerName.endswith('ghost')):
+            log.info(f"Match: {sp1.superPlayerName} vs {sp2.superPlayerName}")
+            if not mock:
+                match_bw_superplayers(sp1, sp2)
+            store_match_results(sp1, sp2, mock)
 
     log.info("Torneo terminato")
 
