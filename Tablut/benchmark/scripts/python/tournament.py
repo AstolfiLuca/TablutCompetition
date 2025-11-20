@@ -272,8 +272,10 @@ if __name__ == "__main__":
         clear_old_results_csv(CONFIG["single_match_result_file"])
         sp1 = list_superplayers[0]
         sp2 = list_superplayers[1]
-        sp1.superPlayerName += '_sm'
-        sp2.superPlayerName += '_sm'
+        sp1.playerW.name += '_sm'
+        sp1.playerB.name += '_sm'
+        sp2.playerW.name += '_sm'
+        sp2.playerB.name += '_sm'
         log.info(f"Match tra {sp1.superPlayerName} e {sp2.superPlayerName}")
         match_bw_superplayers(sp1,sp2)
         store_match_results(sp1,sp2)
