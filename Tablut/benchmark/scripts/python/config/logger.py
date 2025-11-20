@@ -2,6 +2,19 @@ import logging
 import sys
 from .config_reader import CONFIG
 
+verbose = CONFIG["verbose"]
+
+
+
+def vmessage(message, debug=False):
+    global verbose
+
+    if verbose:
+        if debug:
+            log.debug(message)
+        else:
+            log.info(message)
+
 def setup_logger(name):
 
     logger = logging.getLogger(name)
@@ -11,7 +24,7 @@ def setup_logger(name):
     level = logging.getLevelName(CONFIG["logger_level"])
     logger.setLevel(level)
 
-    formatter = logging.Formatter('%(asctime)s - %(levelname)s -  %(name)s - %(message)s')
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(name)s - %(message)s')
 
     # Handler (Semplice: scriviamo solo su console per compattezza)
     # Se vuoi anche il file, aggiungeresti un FileHandler qui.
@@ -23,3 +36,5 @@ def setup_logger(name):
 
 
     return logger
+
+log = setup_logger(__name__)

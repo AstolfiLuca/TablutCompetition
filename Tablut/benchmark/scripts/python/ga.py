@@ -4,7 +4,7 @@ import random
 import logging
 
 import numpy as np
-from config.logger import setup_logger
+from config.logger import setup_logger, vmessage, verbose
 from config.config_reader import CONFIG
 
 import calculateElo as elo
@@ -37,6 +37,17 @@ final_population_path = CONFIG["gen_alg_final_population_path"]
 tournament_result_history_file = CONFIG["tournament_result_history_file"]
 
 last_id = CONFIG["gen_alg_popsize"] + 1 # GLOBAL SP ID COUNTER
+
+
+def vmessage(message, debug=False):
+    global verbose
+
+    if verbose:
+        if debug:
+            log.debug(message)
+        else:
+            log.info(message)
+
 
 def getSPName(individual):
     return individual["superPlayerName"]
@@ -118,7 +129,7 @@ def crossover(parent1, parent2):
     return individual
 
 
-def generate_base(popsize, probability):
+def generate_base(popsize, probability, verbose):
     global last_id
 
     pop = []
@@ -157,7 +168,9 @@ def generate_base(popsize, probability):
         remaining -= 1
 
     result = pop[:popsize]
-    log.info(f"Generate_base: {result}")
+    
+    vmessage(f"Generate_base: {result}")
+    
     return result
 
 def getParent(pop, fitness_dict):
@@ -178,6 +191,7 @@ def generate_new_members(pop, fitness_dict, num_children, probability, current_g
     while len(new_members) < num_children:
         parent1 = getParent(pop, fitness_dict)
         parent2 = getParent(pop, fitness_dict)
+
         child = crossover(parent1, parent2)
         mutate(child, probability, current_gen, gens)
 
@@ -216,13 +230,14 @@ def getFitness(pop, mock=False):
 
 
 def run(pop, gens, popsize, num_children, probability, verbose=False, mock=False):
-    tournament.empty_results_csv(tournament_result_history_file) #SVUOTA il file dei risultati storici ogni volta che l'algoritmo viene attivato
+    tournament.clear_old_results_csv(tournament_result_history_file) #SVUOTA il file dei risultati storici ogni volta che l'algoritmo viene attivato
+    
     fitness_dict = getFitness(pop, mock) # True = Mock
 
     for gen in range(gens):
+        log.info(f"=== GENERATION {gen} ===")
+        
         if verbose:
-            log.info(f"=== GENERATION {gen} ===")
-
             best = max(
                 pop, 
                 key=lambda individual: fitness_dict[getSPName(individual)]
@@ -242,27 +257,25 @@ def run(pop, gens, popsize, num_children, probability, verbose=False, mock=False
 
         # Unisco i nuovi membri ai precedenti
         combined = pop + new_members
-        log.info(f"Combined Population = {combined}")
-        log.info(f"Combined Names = {[getSPName(individual) for individual in combined]}")
+        vmessage(f"Combined Population = {combined}")
+        vmessage(f"Combined Names = {[getSPName(individual) for individual in combined]}")
 
         # Calcolo la fitness ({name : elo}) degli individui della popolazione 
         # Nota: dato che sono già ordinati posso rimuovere gli "extra"
 
         fitness_dict = getFitness(combined, mock)
-        log.info(f"Fitness_dict (current generation) = {fitness_dict}")
+        vmessage(f"Fitness_dict (current generation) = {fitness_dict}")
 
         # Seleziono solo i migliori
         pop = select_best(combined, fitness_dict, popsize)
-        log.info(f"Pop after select_best = {pop}")
-        log.info(f"Names after select_best = {[getSPName(individual) for individual in pop]}")
+
+        vmessage(f"Pop after select_best = {pop}")
+        log.info(f"Best so far = {[getSPName(individual) for individual in pop]}")
 
     return pop
 
 
 if __name__ == "__main__":
-    # Attivazione logging
-    verbose = True
-
     # Parametri dell'algoritmo genetico
     popsize = CONFIG["gen_alg_popsize"]
     num_children = CONFIG["gen_alg_num_children"]
@@ -276,7 +289,7 @@ if __name__ == "__main__":
 
     # Run GA
     final_pop = run(
-        pop=generate_base(popsize, delta),
+        pop=generate_base(popsize, delta, verbose),
         gens=gens,
         popsize=popsize,
         num_children=num_children,
@@ -285,11 +298,11 @@ if __name__ == "__main__":
         mock=mock
     )
 
-    if verbose:
-        log.info("=== FINAL pop ===")
-        log.info(f"Final pop = {final_pop}")
-        log.info(f"Final pop names = {[getSPName(player) for player in final_pop]}")
-        log.info(f"Fitness dict (history of all players) = {elo.calculate_elo_ratings_sorted(tournament_result_history_file)}")
+    log.info("=== FINAL pop ===")
+    log.info(f"Final pop names = {[getSPName(player) for player in final_pop]}")
+    
+    vmessage(f"Final pop = {final_pop}")
+    vmessage(f"Fitness dict (history of all players) = {elo.calculate_elo_ratings_sorted(tournament_result_history_file)}")
 
     with open(final_population_path, "w") as f:
         json.dump(final_pop, f, indent=2)

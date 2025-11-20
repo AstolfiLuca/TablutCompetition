@@ -21,6 +21,11 @@ tournament_result_by_generation_file: results/match_results_by_generation.csv
 single_match_result_file: results/single_match_results.csv
 single_match_superplayers: ../../players/single_match_superplayers.json
 
+tournament_result_history_file: results/match_results_history.csv
+tournament_result_by_generation_file: results/match_results_by_generation.csv
+single_match_result_file: results/single_match_results.csv
+single_match_superplayers: ../../players/single_match_superplayers.json
+
 gen_alg_popsize: 2
 gen_alg_num_children: 2
 gen_alg_num_generations: 3
@@ -33,6 +38,7 @@ gen_alg_mock: False
 
 
 logger_level: INFO
+verbose: True
 
 
 
