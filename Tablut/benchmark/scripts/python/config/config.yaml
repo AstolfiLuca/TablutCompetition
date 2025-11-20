@@ -5,7 +5,7 @@ process_log_folder: ./logs
 server:
   jar: *UBER_JAR
   main_class: it.unibo.ai.didattica.competition.tablut.server.Server
-  parameters: ["-t", "2000"]
+  parameters: ["-g","-t","2000"]
   log_file: server.logs
 
 client:
@@ -21,16 +21,12 @@ tournament_result_by_generation_file: results/match_results_by_generation.csv
 single_match_result_file: results/single_match_results.csv
 single_match_superplayers: ../../players/single_match_superplayers.json
 
-tournament_result_history_file: results/match_results_history.csv
-tournament_result_by_generation_file: results/match_results_by_generation.csv
-single_match_result_file: results/single_match_results.csv
-single_match_superplayers: ../../players/single_match_superplayers.json
 
-gen_alg_popsize: 2
-gen_alg_num_children: 2
-gen_alg_num_generations: 3
-gen_alg_delta: 0.4
-gen_alg_sigma: 0.3
+gen_alg_popsize: 4
+gen_alg_num_children: 4
+gen_alg_num_generations: 5
+gen_alg_delta: 0.5
+gen_alg_sigma: 0.35
 gen_alg_base_superplayers_path: ../../players/base_superplayers.json
 gen_alg_superplayers_path: ../../players/superplayers.json
 gen_alg_final_population_path: ../../players/final_population.json

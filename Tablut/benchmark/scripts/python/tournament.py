@@ -6,13 +6,44 @@ import json
 import random
 import itertools
 import subprocess
+from dataclasses import dataclass
 from datetime import datetime
+from typing import Dict, Any
 
 from config.config_reader import CONFIG
 from config.logger import setup_logger, vmessage, verbose
 
 log = setup_logger(__name__)
+@dataclass
+class Player:
+    name: str
+    client_name: str
+    role: str
+    heuristics: Dict[str, float]
 
+    @staticmethod
+    def from_dict(data: Dict[str, Any]) -> 'Player':
+        return Player(
+            name=data['name'],
+            client_name=data['clientName'],
+            role=data['role'],
+            heuristics=data['heuristics']
+        )
+
+@dataclass
+class Superplayer:
+    superPlayerName: str
+    playerW: Player
+    playerB: Player
+
+    @staticmethod
+    def from_dict(data: Dict[str, Any]) -> 'Superplayer':
+
+        return Superplayer(
+            superPlayerName=data['superPlayerName'],
+            playerW=Player.from_dict(data['playerW']),
+            playerB=Player.from_dict(data['playerB'])
+        )
 
 def clear_old_results_csv(file_path):
     with open(file_path, 'r') as f:
@@ -32,11 +63,6 @@ def clear_old_logs(folder):
 
     vmessage(f"Cartella {folder} svuotata con successo.", debug=True)
 
-        return Superplayer(
-            super_player_name=data['superPlayerName'],
-            player_w=Player.from_dict(data['playerW']),
-            player_b=Player.from_dict(data['playerB'])
-        )
 
 def load_superplayers_from_file(filename):
     vmessage(f"Tentativo di lettura dal file: {filename}", debug=True)
@@ -89,7 +115,7 @@ def run_client(player):
         json.dumps(player["heuristics"])
     ]
 
-    vmessage(f"Avvio del client {player['name']} con timeout {CONFIG["client"]["timeout"]} secondi... Log su: {log_file_path}", debug=True)
+    vmessage(f"Avvio del client {player['name']} con timeout {CONFIG['client']['timeout']} secondi... Log su: {log_file_path}", debug=True)
 
     with open(log_file_path, "a") as log_file:
         process = subprocess.Popen(
@@ -110,11 +136,11 @@ def match_bw_players(p1, p2):
 
     vmessage(f"Avvio del client {p1['role']} con nome {p1['name']}...", debug=True)
     client1_process = run_client(p1)
-    #time.sleep(1)
+    time.sleep(1)
 
     vmessage(f"Avvio del client {p2['role']} con nome {p2['name']}...", debug=True)
     client2_process = run_client(p2)
-    #time.sleep(1)
+    time.sleep(1)
 
     for process in [server_process, client1_process, client2_process]:
         process.wait()
@@ -144,7 +170,7 @@ def write_on_csv(filename, headers, row):
 def lookup_match_results(playerW, playerB):
     pattern = os.path.join(
         CONFIG["process_log_folder"],
-        f"_{playerW["name"]}_vs_{playerB["name"]}_*"
+        f"_{playerW['name']}_vs_{playerB['name']}_*"
     )
 
     files_found = glob.glob(pattern)
@@ -161,6 +187,9 @@ def lookup_match_results(playerW, playerB):
                 return row.strip()
 
 def store_match_results(sp1, sp2, mock=False):
+    headers = ["Timestamp", "SuperPlayer_1", "SuperPlayer_2", "Punteggio_SP1", "Punteggio_SP2"]
+    format = "%d-%m-%Y %H:%M"
+    timestamp = datetime.now().strftime(format)
     if not mock:
         res1 = lookup_match_results(sp1["playerW"], sp2["playerB"])
         res2 = lookup_match_results(sp2["playerW"], sp1["playerB"])
@@ -188,17 +217,15 @@ def store_match_results(sp1, sp2, mock=False):
             case _:
                 log.error(f"Risultato non valido: {res2}")
                 raise ValueError("Risultato non valido")
+        sp2_points = 2-sp1_points
+        match_result_row = (timestamp, sp1['superPlayerName'], sp2['superPlayerName'], sp1_points,sp2_points)
 
-        match_result_row = (timestamp, sp1.super_player_name, sp2.super_player_name, sp1_points,sp2_points)
-        write_results(headers, match_result_row)
     else:
         rand_points = random.choice([0, 0.5, 1, 1.5, 2])
         sp1_points = rand_points
         sp2_points = 2-rand_points
-        match_result_row = (timestamp, sp1.super_player_name, sp2.super_player_name, sp1_points,sp2_points)
-        write_results(headers, match_result_row)
+        match_result_row = (timestamp, sp1['superPlayerName'], sp2['superPlayerName'], sp1_points,sp2_points)
 
-def write_results(headers, match_result_row):
     if "single_match" in CONFIG and CONFIG["single_match"]:
         write_on_csv(CONFIG["single_match_result_file"], headers, match_result_row)
         log.info(f"{match_result_row[1]} : {match_result_row[3]}, {match_result_row[2]} : {match_result_row[4]}")
@@ -206,21 +233,6 @@ def write_results(headers, match_result_row):
         write_on_csv(CONFIG["tournament_result_by_generation_file"], headers, match_result_row)
         write_on_csv(CONFIG["tournament_result_history_file"], headers, match_result_row)
 
-def empty_results_csv(file_path):
-
-    try:
-        with open(file_path, 'r', encoding='utf-8') as f:
-            header = f.readline()
-
-        with open(file_path, 'w', encoding='utf-8') as f:
-            f.write(header)
-
-        log.debug(f"File '{file_path}' svuotato con successo (header mantenuto).")
-
-    except FileNotFoundError:
-        log.error(f"Errore: Il file '{file_path}' non esiste.")
-    except Exception as e:
-        log.error(f"Si è verificato un errore: {e}")
 
 def run_tournament(superplayers_file, mock=False):
     # Pulisco i risultati del precedente torneo
@@ -254,14 +266,14 @@ if __name__ == "__main__":
         CONFIG["server"]["log_file"] = 'server_single_match.logs'
         CONFIG["client"]["timeout"] = 1
         CONFIG["single_match"] = True
-        empty_results_csv(CONFIG["single_match_result_file"])
+        clear_old_results_csv(CONFIG["single_match_result_file"])
         sp1 = list_superplayers[0]
         sp2 = list_superplayers[1]
-        sp1.super_player_name += '_sm'
-        sp2.super_player_name += '_sm'
-        log.info(f"Match tra {sp1.super_player_name} e {sp2.super_player_name}")
+        sp1.superPlayerName += '_sm'
+        sp2.superPlayerName += '_sm'
+        log.info(f"Match tra {sp1.superPlayerName} e {sp2.superPlayerName}")
         match_bw_superplayers(sp1,sp2)
-        store_result_of_match(sp1,sp2)
+        store_match_results(sp1,sp2)
 
 
 
