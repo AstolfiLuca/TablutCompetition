@@ -266,7 +266,7 @@ def store_result_of_match(sp1,sp2,mock=False):
         write_results(headers, match_result_row)
 
 def write_results(headers, match_result_row):
-    if CONFIG["single_match"]:
+    if "single_match" in CONFIG and CONFIG["single_match"]:
         write_on_csv(CONFIG["single_match_result_file"], headers, match_result_row)
         log.info(f"{match_result_row[1]} : {match_result_row[3]}, {match_result_row[2]} : {match_result_row[4]}")
     else:

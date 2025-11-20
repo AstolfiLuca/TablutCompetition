@@ -128,6 +128,9 @@ def generate_base(popsize, probability):
 
     pop += base
 
+    if popsize != len(pop):
+        last_id = len(pop) + 1
+
     remaining = popsize - len(base) # Numero di nuovi superplayer
 
     while remaining > 0:
