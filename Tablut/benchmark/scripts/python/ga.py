@@ -93,10 +93,12 @@ def mutate(individual, probability, current_gen=0, gens=1):
     B_H = getSPHeuristicsBlack(individual)
 
     for WH_key in W_H.keys():
-        W_H[WH_key] += max(int(np.random.normal(0, prob * W_H[WH_key])),0)
+        W_H[WH_key] += int(np.random.normal(0, prob * W_H[WH_key]))
+        W_H[WH_key] = max(W_H[WH_key],0)
 
     for BH_key in B_H.keys():
-        B_H[BH_key] += max(int(np.random.normal(0, prob * B_H[BH_key])),0)
+        B_H[BH_key] += int(np.random.normal(0, prob * B_H[BH_key]))
+        B_H[BH_key] = max(B_H[BH_key],0)
 
 def crossover(parent1, parent2):
     # Copio il genitore, comprese le euristiche che andrò a modificare
