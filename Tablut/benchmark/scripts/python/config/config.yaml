@@ -32,8 +32,11 @@ gen_alg_superplayers_path: ../../players/superplayers.json
 gen_alg_final_population_path: ../../players/final_population.json
 gen_alg_mock: False
 
+# Multiprocessing starting port
+port: 5000
 
-logger_level: INFO
+
+logger_level: DEBUG
 verbose: True
 
 

@@ -8,7 +8,7 @@ from config.logger import setup_logger, vmessage, verbose
 from config.config_reader import CONFIG
 
 import calculateElo as elo
-import tournament as tournament
+import tournament_parallel as tournament
 
 
 """

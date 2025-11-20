@@ -7,12 +7,13 @@ import random
 import itertools
 import subprocess
 from datetime import datetime
-from multiprocessing import Pool
+from multiprocessing import Lock, Pool
 
 from config.config_reader import CONFIG
 from config.logger import setup_logger, vmessage, verbose
 
 log = setup_logger(__name__)
+
 
 
 def clear_old_results_csv(file_path):
@@ -44,7 +45,7 @@ def load_superplayers_from_file(filename):
     return superplayers
 
 
-def run_server():
+def run_server(white_port, black_port):
     os.makedirs(CONFIG["process_log_folder"], exist_ok=True)
 
     log_file_path = os.path.join(CONFIG["process_log_folder"], CONFIG["server"]["log_file"])
@@ -54,7 +55,7 @@ def run_server():
         "-cp",
         CONFIG["server"]["jar"],
         CONFIG["server"]["main_class"]
-    ] + CONFIG["server"]["parameters"]
+    ] + CONFIG["server"]["parameters"] + ["-wp", str(white_port), "-bp", str(black_port)]
 
     vmessage(f"Avvio del server... Log su: {log_file_path}", debug=True)
 
@@ -70,7 +71,7 @@ def run_server():
     return process
 
 
-def run_client(player):
+def run_client(player, port):
     os.makedirs(CONFIG["process_log_folder"], exist_ok=True)
 
     log_file_path = os.path.join(CONFIG["process_log_folder"], player["name"] + ".logs")
@@ -85,7 +86,7 @@ def run_client(player):
         CONFIG["client"]["server_ip"], 
         player["name"], 
         json.dumps(player["heuristics"])
-    ]
+    ] + [str(port)]
 
     vmessage(
         f"Avvio del client {player['name']} con timeout {CONFIG['client']['timeout']} secondi... Log su: {log_file_path}",
@@ -104,16 +105,23 @@ def run_client(player):
     return process
 
 
-def match_bw_players(p1, p2):
+def match_bw_players(p1, p2, port=None):
+    white_port = port
+    black_port = white_port + 1
+
     vmessage("Avvio del server...", debug=True)
-    server_process = run_server()
+    server_process = run_server(white_port=white_port, black_port=black_port)
     time.sleep(1)
 
+    client1_port =  white_port if str(p1['role']).lower() == 'white' else black_port
     vmessage(f"Avvio del client {p1['role']} con nome {p1['name']}...", debug=True)
-    client1_process = run_client(p1)
+    client1_process = run_client(p1, port=client1_port)
+    time.sleep(1)
 
+    client2_port =  white_port if str(p2['role']).lower() == 'white' else black_port
     vmessage(f"Avvio del client {p2['role']} con nome {p2['name']}...", debug=True)
-    client2_process = run_client(p2)
+    client2_process = run_client(p2, port=client2_port)
+    time.sleep(1)
 
     for process in [server_process, client1_process, client2_process]:
         process.wait()
@@ -122,12 +130,12 @@ def match_bw_players(p1, p2):
     vmessage("Tutti i processi del game hanno terminato", debug=True)
 
 
-def match_bw_superplayers(sp1, sp2):
+def match_bw_superplayers(sp1, sp2, port):
     vmessage(f"Game_1: WHITE: {sp1['playerW']['name']} vs BLACK: {sp2['playerB']['name']}")
-    match_bw_players(sp1["playerW"], sp2["playerB"])
+    match_bw_players(sp1["playerW"], sp2["playerB"], port)
 
     vmessage(f"Game_2: WHITE: {sp2['playerW']['name']} vs BLACK: {sp1['playerB']['name']}")
-    match_bw_players(sp2["playerW"], sp1["playerB"])
+    match_bw_players(sp2["playerW"], sp1["playerB"], port)
 
 
 def write_on_csv(filename, headers, row):
@@ -220,9 +228,14 @@ def store_match_results(sp1, sp2, mock=False):
 # --------------------------
 
 def _run_single_match(args):
-    sp1, sp2, mock = args
+    sp1, sp2, mock, idx = args
+    # Offset to reintantiate next white/black ports
+    offset = 2
+
+    port = CONFIG["port"] + idx + offset
+
     if not mock:
-        match_bw_superplayers(sp1, sp2)
+        match_bw_superplayers(sp1, sp2, port)
     store_match_results(sp1, sp2, mock)
 
 
@@ -238,13 +251,17 @@ def run_tournament(superplayers_file, mock=False):
     # Ottengo superplayers
     superplayers = load_superplayers_from_file(superplayers_file)
 
-    # Creo le coppie che si sfideranno
-    combinations = [(sp1, sp2, mock) for sp1, sp2 in itertools.combinations(superplayers, 2)]
+    # Creo le coppie che si sfideranno - con idx per la successione delle porte
+    combinations = [(sp1, sp2, mock, idx) 
+                   for idx, (sp1, sp2) in enumerate(itertools.combinations(superplayers, 2))]
 
     log.info(f"Totale match da eseguire: {len(combinations)}")
 
+    # Default: usa meta' delle risorse per non oversaturare
+    num_processes = max(1, os.cpu_count() // 2)
+
     # Parallelizzazione semplice
-    with Pool() as p:
+    with Pool(processes=num_processes) as p:
         p.map(_run_single_match, combinations)
 
     log.info("Torneo terminato")
