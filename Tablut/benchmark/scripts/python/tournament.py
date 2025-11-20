@@ -185,23 +185,17 @@ def store_match_results(sp1, sp2, mock=False):
                 raise ValueError("Risultato non valido")
 
     else:
-        sp1_points = random.choice([0, 0.5, 1, 1.5, 2])
+        rand_points = random.choice([0, 0.5, 1, 1.5, 2])
+        sp1_points = rand_points
+        sp2_points = 2-rand_points
+        match_result_row = (timestamp, sp1.super_player_name, sp2.super_player_name, sp1_points,sp2_points)
     
-    sp2_points = 2 - sp1_points
-
-    
-    headers = ["Timestamp", "SuperPlayer_1", "SuperPlayer_2", "Punteggio_SP1", "Punteggio_SP2"]
-
-    row = (
-        datetime.now().strftime("%d-%m-%Y %H:%M"), # Timestamp
-        sp1["superPlayerName"],
-        sp2["superPlayerName"],
-        sp1_points,
-        sp2_points
-    )
-
-    write_on_csv(CONFIG["tournament_result_by_generation_file"], headers, row)
-    write_on_csv(CONFIG["tournament_result_history_file"], headers, row)
+    if CONFIG["single_match"]:
+        write_on_csv(CONFIG["single_match_result_file"], headers, match_result_row)
+        log.info(f"{match_result_row[1]} : {match_result_row[3]}, {match_result_row[2]} : {match_result_row[4]}")
+    else:
+        write_on_csv(CONFIG["tournament_result_by_generation_file"], headers, match_result_row)
+        write_on_csv(CONFIG["tournament_result_history_file"], headers, match_result_row)
 
 
 def run_tournament(superplayers_file, mock=False):
@@ -222,3 +216,38 @@ def run_tournament(superplayers_file, mock=False):
         store_match_results(sp1, sp2, mock)
 
     log.info("Torneo terminato")
+
+
+
+if __name__ == "__main__":
+    #single match
+    list_superplayers = load_superplayers_from_file(CONFIG["single_match_superplayers"])
+    if len(list_superplayers) != 2:
+        log.error("Puoi fare il match singolo solo fra due superplayer")
+        exit(1)
+    else:
+        CONFIG["server"]["parameters"] = ["-g","-t", "2000"]
+        CONFIG["server"]["log_file"] = 'server_single_match.logs'
+        CONFIG["client"]["timeout"] = 1
+        CONFIG["single_match"] = True
+        empty_results_csv(CONFIG["single_match_result_file"])
+        sp1 = list_superplayers[0]
+        sp2 = list_superplayers[1]
+        sp1.super_player_name += '_sm'
+        sp2.super_player_name += '_sm'
+        log.info(f"Match tra {sp1.super_player_name} e {sp2.super_player_name}")
+        match_bw_superplayers(sp1,sp2)
+        store_result_of_match(sp1,sp2)
+
+
+
+
+
+
+
+
+
+
+
+
+
