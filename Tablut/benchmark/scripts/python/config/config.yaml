@@ -19,7 +19,7 @@ client:
 starting_elo: 1500
 k_factor: 32
 
-gen_alg_popsize: 2
+gen_alg_popsize: 3
 gen_alg_num_children: 2
 gen_alg_num_generations: 3
 gen_alg_delta: 0.4
@@ -31,6 +31,7 @@ gen_alg_mock: False
 
 
 logger_level: INFO
+verbose: True
 
 
 

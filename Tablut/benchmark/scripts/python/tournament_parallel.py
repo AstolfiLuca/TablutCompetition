@@ -7,6 +7,7 @@ import random
 import itertools
 import subprocess
 from datetime import datetime
+from multiprocessing import Pool
 
 from config.config_reader import CONFIG
 from config.logger import setup_logger, vmessage, verbose
@@ -22,6 +23,7 @@ def clear_old_results_csv(file_path):
         f.write(header)
         
     vmessage(f"File '{file_path}' svuotato con successo (header mantenuto).", debug=True)
+
 
 def clear_old_logs(folder):
     for nome_elemento in os.listdir(folder):
@@ -67,6 +69,7 @@ def run_server():
 
     return process
 
+
 def run_client(player):
     os.makedirs(CONFIG["process_log_folder"], exist_ok=True)
 
@@ -84,7 +87,10 @@ def run_client(player):
         json.dumps(player["heuristics"])
     ]
 
-    vmessage(f"Avvio del client {player['name']} con timeout {CONFIG["client"]["timeout"]} secondi... Log su: {log_file_path}", debug=True)
+    vmessage(
+        f"Avvio del client {player['name']} con timeout {CONFIG['client']['timeout']} secondi... Log su: {log_file_path}",
+        debug=True
+    )
 
     with open(log_file_path, "a") as log_file:
         process = subprocess.Popen(
@@ -105,11 +111,9 @@ def match_bw_players(p1, p2):
 
     vmessage(f"Avvio del client {p1['role']} con nome {p1['name']}...", debug=True)
     client1_process = run_client(p1)
-    #time.sleep(1)
 
     vmessage(f"Avvio del client {p2['role']} con nome {p2['name']}...", debug=True)
     client2_process = run_client(p2)
-    #time.sleep(1)
 
     for process in [server_process, client1_process, client2_process]:
         process.wait()
@@ -117,32 +121,39 @@ def match_bw_players(p1, p2):
 
     vmessage("Tutti i processi del game hanno terminato", debug=True)
 
+
 def match_bw_superplayers(sp1, sp2):
     vmessage(f"Game_1: WHITE: {sp1['playerW']['name']} vs BLACK: {sp2['playerB']['name']}")
     match_bw_players(sp1["playerW"], sp2["playerB"])
 
     vmessage(f"Game_2: WHITE: {sp2['playerW']['name']} vs BLACK: {sp1['playerB']['name']}")
-    match_bw_players(sp1["playerB"], sp2["playerW"])
+    match_bw_players(sp2["playerW"], sp1["playerB"])
 
 
 def write_on_csv(filename, headers, row):
     vmessage(f"Scrivendo i risultati su {filename}", debug=True)
 
+    file_exists = os.path.exists(filename)
+
     with open(filename, mode='a', newline='') as file_csv:
         writer = csv.writer(file_csv, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
-        if not os.path.exists(filename):
+        if not file_exists:
             writer.writerow(headers)
 
         writer.writerow(row)
 
+
 def lookup_match_results(playerW, playerB):
     pattern = os.path.join(
         CONFIG["process_log_folder"], 
-        f"_{playerW["name"]}_vs_{playerB["name"]}_*"
+        f"_{playerW['name']}_vs_{playerB['name']}_*"
     )
 
     files_found = glob.glob(pattern)
+
+    if not files_found:
+        raise FileNotFoundError(f"Nessun log trovato per pattern {pattern}")
 
     filename = files_found[0]
 
@@ -154,6 +165,7 @@ def lookup_match_results(playerW, playerB):
         for row in reversed(rows):
             if row:
                 return row.strip()
+
 
 def store_match_results(sp1, sp2, mock=False):
     if not mock:
@@ -189,11 +201,10 @@ def store_match_results(sp1, sp2, mock=False):
     
     sp2_points = 2 - sp1_points
 
-    
     headers = ["Timestamp", "SuperPlayer_1", "SuperPlayer_2", "Punteggio_SP1", "Punteggio_SP2"]
 
     row = (
-        datetime.now().strftime("%d-%m-%Y %H:%M"), # Timestamp
+        datetime.now().strftime("%d-%m-%Y %H:%M"),
         sp1["superPlayerName"],
         sp2["superPlayerName"],
         sp1_points,
@@ -204,21 +215,36 @@ def store_match_results(sp1, sp2, mock=False):
     write_on_csv(CONFIG["tournament_result_history_file"], headers, row)
 
 
+# --------------------------
+#   PARALLEL WORKER
+# --------------------------
+
+def _run_single_match(args):
+    sp1, sp2, mock = args
+    if not mock:
+        match_bw_superplayers(sp1, sp2)
+    store_match_results(sp1, sp2, mock)
+
+
+# --------------------------
+#   TOURNAMENT MAIN
+# --------------------------
+
 def run_tournament(superplayers_file, mock=False):
-    # Pulisco i risultati del precedente torneo 
+    # Pulisco risultati precedenti
     clear_old_logs(CONFIG["process_log_folder"])
     clear_old_results_csv(CONFIG["tournament_result_by_generation_file"])
 
-    # Ottengo i superplayers attuali
+    # Ottengo superplayers
     superplayers = load_superplayers_from_file(superplayers_file)
 
-    # Creo le coppie ed inizio il torneo
-    for sp1, sp2 in itertools.combinations(superplayers, 2):
-        log.info(f"Match: {sp1['superPlayerName']} vs {sp2['superPlayerName']}")
+    # Creo le coppie che si sfideranno
+    combinations = [(sp1, sp2, mock) for sp1, sp2 in itertools.combinations(superplayers, 2)]
 
-        if not mock:
-            match_bw_superplayers(sp1, sp2)
+    log.info(f"Totale match da eseguire: {len(combinations)}")
 
-        store_match_results(sp1, sp2, mock)
+    # Parallelizzazione semplice
+    with Pool() as p:
+        p.map(_run_single_match, combinations)
 
     log.info("Torneo terminato")
