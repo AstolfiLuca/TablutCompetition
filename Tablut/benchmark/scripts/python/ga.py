@@ -292,6 +292,8 @@ def select_ghosts(current_pop, current_best, gen, fitness_dict, current_ghosts):
                 ghosts.append(getPlayerByName(player_name, current_pop))
         for ghost in ghosts:
             ghost["superPlayerName"] += 'ghost'
+            ghost["playerW"]["name"] += 'ghost'
+            ghost["playerB"]["name"] += 'ghost'
         return ghosts
     else: #nelle altre iterazioni sono i caduti delle generazioni precedenti
         for player_name in fitness_dict:
@@ -305,6 +307,8 @@ def select_ghosts(current_pop, current_best, gen, fitness_dict, current_ghosts):
         for ghost in ghosts:
             if not ghost["superPlayerName"].endswith('ghost'):
                 ghost["superPlayerName"] += 'ghost'
+                ghost["playerW"]["name"] += 'ghost'
+                ghost["playerB"]["name"] += 'ghost'
         return ghosts
 
 
@@ -321,7 +325,6 @@ if __name__ == "__main__":
     sigma = CONFIG["gen_alg_sigma"] # Variazione durante le iterazioni (moderata)
 
     mock = CONFIG["gen_alg_mock"] #Per mockare le partite
-
 
     # Run GA
     final_pop = run(
