@@ -14,6 +14,7 @@ from config.logger import setup_logger, vmessage, verbose
 
 log = setup_logger(__name__)
 
+csv_lock_server = Lock()
 
 
 def clear_old_results_csv(file_path):
@@ -48,7 +49,7 @@ def load_superplayers_from_file(filename):
 def run_server(white_port, black_port):
     os.makedirs(CONFIG["process_log_folder"], exist_ok=True)
 
-    log_file_path = os.path.join(CONFIG["process_log_folder"], CONFIG["server"]["log_file"])
+    log_file_path = os.path.join(CONFIG["process_log_folder"], str(white_port) + str(black_port) + CONFIG["server"]["log_file"])
 
     cmd = [
         "java",
@@ -59,12 +60,13 @@ def run_server(white_port, black_port):
 
     vmessage(f"Avvio del server... Log su: {log_file_path}", debug=True)
 
-    with open(log_file_path, "a") as log_file:
-        process = subprocess.Popen(
-            cmd,
-            stdout=log_file,
-            stderr=log_file
-        )
+    with csv_lock_server:
+        with open(log_file_path, "a") as log_file:
+            process = subprocess.Popen(
+                cmd,
+                stdout=log_file,
+                stderr=log_file
+            )
 
     vmessage(f"Processo server avviato in background con PID: {process.pid}", debug=True)
 
@@ -230,9 +232,9 @@ def store_match_results(sp1, sp2, mock=False):
 def _run_single_match(args):
     sp1, sp2, mock, idx = args
     # Offset to reintantiate next white/black ports
-    offset = 2
+    offset = 3
 
-    port = CONFIG["port"] + idx + offset
+    port = CONFIG["port"] + (idx * 2) + offset
 
     if not mock:
         match_bw_superplayers(sp1, sp2, port)
@@ -258,7 +260,7 @@ def run_tournament(superplayers_file, mock=False):
     log.info(f"Totale match da eseguire: {len(combinations)}")
 
     # Default: usa meta' delle risorse per non oversaturare
-    num_processes = max(1, os.cpu_count() // 2)
+    num_processes = max(1, os.cpu_count())
 
     # Parallelizzazione semplice
     with Pool(processes=num_processes) as p:
