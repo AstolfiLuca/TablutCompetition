@@ -31,7 +31,15 @@ public class Gui {
 	public void update(State aState) {
 		background.setaState(aState);
 		frame.repaint();
-	}	
+	}
+	public void updateWithTitle(State aState) {
+		background.setaState(aState);
+		String turn = aState.getTurn().toString();
+		if (turn.equals("B")) turn = "Black";
+		else if (turn.equals("W")) turn = "White";
+		frame.setTitle("Turno corrente:" + turn);
+		frame.repaint();
+	}
 	
 	/**
 	 * Initialization

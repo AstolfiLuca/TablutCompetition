@@ -83,7 +83,8 @@ public class WhiteBaselineHeuristics extends Heuristic {
                     Heuristic heuristic = HeuristicRegistry.createWhiteHeuristic(key, boardState, currentPlayer);
 
                     // Evaluate the heuristic
-                    double heuristicValue = heuristic.evaluateState(state);
+
+                    double heuristicValue =  heuristic.logAndEvaluate(state);
 
                     // Add weighted contribution to total score
                     totalScore += weight * heuristicValue;
@@ -96,7 +97,9 @@ public class WhiteBaselineHeuristics extends Heuristic {
                 System.err.println("Warning: No heuristic implementation registered for key '" + key + "' - skipping");
             }
         }
-
+        System.out.println("Total Score for this state");
+        System.out.println(this.toJson(state));
+        System.out.println(totalScore);
         return totalScore;
     }
 
