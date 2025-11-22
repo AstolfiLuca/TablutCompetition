@@ -4,16 +4,20 @@ from .config_reader import CONFIG
 
 verbose = CONFIG["verbose"]
 
-
-
-def vmessage(message, debug=False):
+def vmessage(message, debug=False, error=False):
     global verbose
 
     if verbose:
         if debug:
             log.debug(message)
-        else:
-            log.info(message)
+            return
+
+        if error:
+            log.error(message)
+            return
+            
+        log.info(message)
+
 
 def setup_logger(name):
 

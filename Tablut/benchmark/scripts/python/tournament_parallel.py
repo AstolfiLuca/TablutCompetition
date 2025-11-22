@@ -7,7 +7,7 @@ import random
 import itertools
 import subprocess
 from datetime import datetime
-from multiprocessing import Lock, Pool
+from multiprocessing import Lock, Pool, Value
 
 from config.config_reader import CONFIG
 from config.logger import setup_logger, vmessage, verbose
@@ -15,6 +15,9 @@ from config.logger import setup_logger, vmessage, verbose
 log = setup_logger(__name__)
 
 csv_lock_server = Lock()
+
+n_combination_lock = Lock()
+n_combination = Value('i', 1)
 
 
 def clear_old_results_csv(file_path):
@@ -133,11 +136,20 @@ def match_bw_players(p1, p2, port=None):
 
 
 def match_bw_superplayers(sp1, sp2, port):
-    vmessage(f"Game_1: WHITE: {sp1['playerW']['name']} vs BLACK: {sp2['playerB']['name']}")
+    global n_combination, n_combination_lock
+
+    with n_combination_lock:
+        log.info(f"{str(n_combination.value).rjust(3)} - Game_1: WHITE: {sp1['playerW']['name']} vs BLACK: {sp2['playerB']['name']}")
+        n_combination.value += 1
+
     match_bw_players(sp1["playerW"], sp2["playerB"], port)
 
-    vmessage(f"Game_2: WHITE: {sp2['playerW']['name']} vs BLACK: {sp1['playerB']['name']}")
+    with n_combination_lock:
+        log.info(f"{str(n_combination.value).rjust(3)} - Game_2: WHITE: {sp2['playerW']['name']} vs BLACK: {sp1['playerB']['name']}")
+        n_combination.value += 1
+
     match_bw_players(sp2["playerW"], sp1["playerB"], port)
+
 
 
 def write_on_csv(filename, headers, row):
@@ -192,7 +204,7 @@ def store_match_results(sp1, sp2, mock=False):
             case "BW":
                 sp1_points += 0
             case _:
-                log.error(f"Risultato non valido: {res1}")
+                vmessage(f"Risultato non valido: {res1}", error=True)
                 raise ValueError("Risultato non valido")
 
         match res2:
@@ -203,7 +215,7 @@ def store_match_results(sp1, sp2, mock=False):
             case "BW":
                 sp1_points += 1
             case _:
-                log.error(f"Risultato non valido: {res2}")
+                vmessage(f"Risultato non valido: {res2}", error=True)
                 raise ValueError("Risultato non valido")
 
     else:
@@ -238,6 +250,7 @@ def _run_single_match(args):
 
     if not mock:
         match_bw_superplayers(sp1, sp2, port)
+
     store_match_results(sp1, sp2, mock)
 
 
@@ -254,16 +267,18 @@ def run_tournament(superplayers_file, mock=False):
     superplayers = load_superplayers_from_file(superplayers_file)
 
     # Creo le coppie che si sfideranno - con idx per la successione delle porte
-    combinations = [(sp1, sp2, mock, idx) 
-                   for idx, (sp1, sp2) in enumerate(itertools.combinations(superplayers, 2))]
+    combinations = [(sp1, sp2, mock, idx) for idx, (sp1, sp2) in enumerate(itertools.combinations(superplayers, 2))]
 
-    log.info(f"Totale match da eseguire: {len(combinations)}")
+    log.info(f"Totale match da eseguire: {len(combinations)} ({len(combinations) * 2} Games)")
 
     # Default: usa meta' delle risorse per non oversaturare
-    num_processes = max(1, os.cpu_count())
+    num_processes = max(1, os.cpu_count() - 2)
 
     # Parallelizzazione semplice
     with Pool(processes=num_processes) as p:
         p.map(_run_single_match, combinations)
+
+    with n_combination_lock:
+        n_combination.value = 0
 
     log.info("Torneo terminato")

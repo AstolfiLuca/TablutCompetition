@@ -38,17 +38,6 @@ tournament_result_history_file = CONFIG["tournament_result_history_file"]
 
 last_id = CONFIG["gen_alg_popsize"] + 1 # GLOBAL SP ID COUNTER
 
-
-def vmessage(message, debug=False):
-    global verbose
-
-    if verbose:
-        if debug:
-            log.debug(message)
-        else:
-            log.info(message)
-
-
 def getSPName(individual):
     return individual["superPlayerName"]
 
@@ -245,7 +234,7 @@ def run(pop, gens, popsize, num_children, probability, verbose=False, mock=False
                 key=lambda individual: fitness_dict[getSPName(individual)]
             )
 
-            log.info(f"The best so far is {getSPName(best)} with fitness {fitness_dict[getSPName(best)]}")
+            vmessage(f"The best so far is {getSPName(best)} with fitness {fitness_dict[getSPName(best)]}")
 
         # Creo i nuovi membri
         new_members = generate_new_members(
@@ -259,8 +248,8 @@ def run(pop, gens, popsize, num_children, probability, verbose=False, mock=False
 
         # Unisco i nuovi membri ai precedenti
         combined = pop + new_members
-        vmessage(f"Combined Population = {combined}")
-        vmessage(f"Combined Names = {[getSPName(individual) for individual in combined]}")
+        vmessage(f"Combined Population = {combined}", debug=True)
+        log.info(f"Combined Names = {[getSPName(individual) for individual in combined]}")
 
         # Calcolo la fitness ({name : elo}) degli individui della popolazione 
         # Nota: dato che sono già ordinati posso rimuovere gli "extra"
@@ -271,7 +260,7 @@ def run(pop, gens, popsize, num_children, probability, verbose=False, mock=False
         # Seleziono solo i migliori
         pop = select_best(combined, fitness_dict, popsize)
 
-        vmessage(f"Pop after select_best = {pop}")
+        vmessage(f"Pop after select_best = {pop}", debug=True)
         log.info(f"Best so far = {[getSPName(individual) for individual in pop]}")
 
     return pop
@@ -289,6 +278,8 @@ if __name__ == "__main__":
 
     mock = CONFIG["gen_alg_mock"] #Per mockare le partite
 
+    log.info("=== Starting ===")
+
     # Run GA
     final_pop = run(
         pop=generate_base(popsize, delta, verbose),
@@ -303,8 +294,8 @@ if __name__ == "__main__":
     log.info("=== FINAL pop ===")
     log.info(f"Final pop names = {[getSPName(player) for player in final_pop]}")
     
-    vmessage(f"Final pop = {final_pop}")
-    vmessage(f"Fitness dict (history of all players) = {elo.calculate_elo_ratings_sorted(tournament_result_history_file)}")
+    vmessage(f"Final pop = {final_pop}", debug=True)
+    vmessage(f"Fitness dict (history of all players) = {elo.calculate_elo_ratings_sorted(tournament_result_history_file)}", debug=True)
 
     with open(final_population_path, "w") as f:
         json.dump(final_pop, f, indent=2)
