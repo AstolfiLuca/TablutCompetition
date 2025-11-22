@@ -349,7 +349,7 @@ def run_tournament(superplayers_file, mock=False):
 
     num_core = psutil.cpu_count(logical=False) - 1
     log.info(f"Sto usando {num_core} al 100%. In questo modo la ricerca è efficiente")
-    num_processes = max(1, num_core - 1)
+    num_processes = max(1, num_core)
 
     # Parallelizzazione semplice
     with Manager() as manager:
