@@ -11,6 +11,8 @@ from datetime import datetime
 from multiprocessing import Lock, Manager, Pool, Value
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
+import psutil
+
 from config.config_reader import CONFIG
 from config.logger import setup_logger, vmessage
 
@@ -345,7 +347,9 @@ def run_tournament(superplayers_file, mock=False):
 
     log.info(f"Totale match da eseguire: {len(combinations)} ({len(combinations) * 2} Games)")
 
-    num_processes = max(1, os.cpu_count() - 4)
+    num_core = psutil.cpu_count(logical=False) - 1
+    log.info(f"Sto usando {num_core} al 100%. In questo modo la ricerca è efficiente")
+    num_processes = max(1, num_core - 1)
 
     # Parallelizzazione semplice
     with Manager() as manager:
