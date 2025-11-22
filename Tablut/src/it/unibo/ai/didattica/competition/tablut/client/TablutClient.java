@@ -77,7 +77,39 @@ public abstract class TablutClient implements Runnable {
 			throw new InvalidParameterException("Player role must be BLACK or WHITE");
 		}
 		this.port = port;
-		playerSocket = new Socket(serverIp, this.port);
+
+		int maxRetries = 3;
+		int retryDelay = 2000; // 0.5 secondi in millisecondi
+		int attempt = 0;
+		boolean connected = false;
+
+		while (!connected && attempt < maxRetries) {
+			try {
+				// Provo a connettermi
+				playerSocket = new Socket(serverIp, this.port);
+				connected = true; // Se arrivo qui, la connessione è riuscita
+				System.out.println("Connessione stabilita con successo!");
+
+			} catch (IOException e) {
+				attempt++;
+				// Se ho esaurito i tentativi, rilancio l'eccezione per fermare il programma
+				if (attempt >= maxRetries) {
+					System.err.println("Impossibile connettersi dopo " + maxRetries + " tentativi.");
+					throw e;
+				}
+
+				System.out.println("Connessione fallita (" + e.getMessage() + "). Riprovo tra " + retryDelay + "ms... (Tentativo " + attempt + "/" + maxRetries + ")");
+
+				try {
+					// Aspetto prima di riprovare
+					Thread.sleep(retryDelay);
+				} catch (InterruptedException ie) {
+					// Gestione dell'interruzione del thread (best practice)
+					Thread.currentThread().interrupt();
+					throw new IOException("Tentativo di connessione interrotto", ie);
+				}
+			}
+		}
 		out = new DataOutputStream(playerSocket.getOutputStream());
 		in = new DataInputStream(playerSocket.getInputStream());
 		this.name = name;

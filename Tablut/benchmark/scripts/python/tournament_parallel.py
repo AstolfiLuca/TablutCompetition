@@ -88,9 +88,6 @@ def load_superplayers_from_file(filename):
 def run_server(white_port, black_port):
     os.makedirs(CONFIG["process_log_folder"], exist_ok=True)
 
-    # Nome log univoco basato sulle porte
-    log_file_path = os.path.join(CONFIG["process_log_folder"], f"Srv_{white_port}_{black_port}" + CONFIG["server"]["log_file"])
-
     cmd = [
         "java",
         "-cp",
@@ -98,13 +95,24 @@ def run_server(white_port, black_port):
         CONFIG["server"]["main_class"]
     ] + CONFIG["server"]["parameters"] + ["-wp", str(white_port), "-bp", str(black_port)]
 
-    vmessage(f"Avvio del server... il file di log si chiamerebbe: {log_file_path} se non l'avessimo piallato", debug=True)
 
-    process = subprocess.Popen(
-        cmd,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL
-    )
+    if CONFIG["gen_alg_systemlog_server"]:
+        # Nome log univoco basato sulle porte
+        log_file_path = os.path.join(CONFIG["process_log_folder"], f"Srv_{white_port}_{black_port}" + CONFIG["server"]["log_file"])
+        vmessage(f"Avvio del server... il file di log è: {log_file_path}", debug=True)
+        with open(log_file_path, "a") as log_file:
+            process = subprocess.Popen(
+                cmd,
+                stdout=log_file,
+                stderr=log_file
+            )
+    else:
+        process = subprocess.Popen(
+            cmd,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
+        )
+
 
     vmessage(f"Processo server avviato in background con PID: {process.pid}", debug=True)
 
@@ -132,11 +140,20 @@ def run_client(player, port):
 
     vmessage(f"Avvio del client {player['name']} con timeout {CONFIG['client']['timeout']} secondi... Log su: {log_file_path}", debug=True)
 
-    process = subprocess.Popen(
-        cmd,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL
-    )
+    if CONFIG["gen_alg_systemlog_client"]:
+        vmessage(f"Avvio del client {player['name']} con timeout {CONFIG['client']['timeout']} secondi... Log su: {log_file_path}", debug=True)
+        with open(log_file_path, "a") as log_file:
+            process = subprocess.Popen(
+                cmd,
+                stdout=log_file,
+                stderr=log_file
+            )
+    else:
+        process = subprocess.Popen(
+            cmd,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
+        )
 
     vmessage(f"Processo Client avviato in background con PID: {process.pid}", debug=True)
 
@@ -152,18 +169,17 @@ def match_bw_players(p1, p2):
         log.error(f"Errore nel reperire porte libere: {e}")
         return
 
+    log.info(f"{p1['name']}_vs_{p2['name']}_ - ports w={white_port} b={black_port}")
     vmessage(f"Avvio match su porte dinamiche W:{white_port} B:{black_port}", debug=True)
     server_process = run_server(white_port=white_port, black_port=black_port)
-    time.sleep(0.5)
+    time.sleep(2)
 
-    client1_port = white_port if str(p1['role']).lower() == 'white' else black_port
     vmessage(f"Avvio del client {p1['role']} con nome {p1['name']}...", debug=True)
-    client1_process = run_client(p1, port=client1_port)
-
-    client2_port = white_port if str(p2['role']).lower() == 'white' else black_port
+    client1_process = run_client(p1, port=white_port)
+    time.sleep(1)
     vmessage(f"Avvio del client {p2['role']} con nome {p2['name']}...", debug=True)
-    client2_process = run_client(p2, port=client2_port)
-
+    client2_process = run_client(p2, port=black_port)
+    time.sleep(1)
     # Timeout di sicurezza per evitare processi appesi per sempre
     TIMEOUT_GLOBAL = 1800 # 30 minuti max per partita
 
@@ -183,7 +199,7 @@ def run_single_game(sp_white, sp_black, game_num):
     global n_combination, n_combination_lock
 
     with n_combination_lock:
-        log.info(f"{str(n_combination.value).rjust(3)} - Game_{game_num}: WHITE: {sp_white['playerW']['name']} vs BLACK: {sp_black['playerB']['name']}")
+        vmessage(f"{str(n_combination.value).rjust(3)} - Game_{game_num}: {sp_white['playerW']['name']}_vs_{sp_black['playerB']['name']}_", debug=True)
         n_combination.value += 1
 
     match_bw_players(sp_white["playerW"], sp_black["playerB"])
@@ -223,7 +239,7 @@ def lookup_match_results(playerW, playerB):
     files_found = glob.glob(pattern)
 
     if not files_found:
-        print(f"Nessun log trovato per pattern {pattern}, ritorno D (DUMMY)")
+        vmessage(f"Nessun log trovato per pattern {pattern}, ritorno D (DUMMY)", error=True)
         return "D"
 
     # Prendi il file più recente se ce ne sono più di uno
@@ -292,17 +308,16 @@ def store_match_results(sp1, sp2, mock=False):
 def run_single_match(args):
     sp1, sp2, mock = args
 
+    if not (sp1['superPlayerName'].endswith('ghost') and sp2['superPlayerName'].endswith('ghost')):
+        uniqueId = f"{sp1['superPlayerName']}_vs_{sp2['superPlayerName']}"
+        vmessage(f"{uniqueId} - AVVIATO")
 
+        if not mock:
+            match_bw_superplayers(sp1, sp2)
 
-    uniqueId = f"{sp1['superPlayerName']}_vs_{sp2['superPlayerName']}"
-    vmessage(f"{uniqueId} - AVVIATO")
-
-    if not mock:
-        match_bw_superplayers(sp1, sp2)
-
-    vmessage(f"{uniqueId} - TERMINATO")
-    store_match_results(sp1, sp2, mock)
-    vmessage(f"{uniqueId} - SALVATO")
+        vmessage(f"{uniqueId} - TERMINATO")
+        store_match_results(sp1, sp2, mock)
+        vmessage(f"{uniqueId} - SALVATO")
 
 
 def run_tournament(superplayers_file, mock=False):

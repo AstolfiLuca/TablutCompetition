@@ -190,11 +190,22 @@ def generate_new_members(pop, fitness_dict, num_children, probability, current_g
 
     return new_members
 
-def select_best(pop, fitness_dict, popsize):
+def select_best_withouth_ghosts(pop, fitness_dict, popsize):
     new_pop = []
 
     for player_name in fitness_dict:
         new_pop.append(getPlayerByName(player_name, pop))
+        if len(new_pop) == popsize:
+            break
+
+    return new_pop
+
+def select_best_with_ghosts(pop, fitness_dict, popsize, ghosts):
+    new_pop = []
+    ghosts_name = [getSPName(ghost) for ghost in ghosts]
+    for player_name in fitness_dict:
+        if player_name not in ghosts_name:
+            new_pop.append(getPlayerByName(player_name, pop))
         if len(new_pop) == popsize:
             break
 
@@ -219,18 +230,17 @@ def getFitness(pop, mock=False):
     # Restituisci la fitness {name : elo}
     return fitness_dict
 
-
-def run(pop, gens, popsize, num_children, probability, verbose=False, mock=False):
+def run_with_ghosts(current_best, gens, popsize, num_children, probability, verbose=False, mock=False):
     tournament.clear_old_results_csv(tournament_result_history_file) #SVUOTA il file dei risultati storici ogni volta che l'algoritmo viene attivato
-    
-    fitness_dict = getFitness(pop, mock) # True = Mock
 
+    fitness_dict = getFitness(current_best, mock) # True = Mock
+    ghosts = []
     for gen in range(gens):
         log.info(f"=== GENERATION {gen} ===")
-        
+
         if verbose:
             best = max(
-                pop, 
+                current_best,
                 key=lambda individual: fitness_dict[getSPName(individual)]
             )
 
@@ -238,33 +248,121 @@ def run(pop, gens, popsize, num_children, probability, verbose=False, mock=False
 
         # Creo i nuovi membri
         new_members = generate_new_members(
-            pop=pop, 
-            fitness_dict=fitness_dict, 
+            pop=current_best,
+            fitness_dict=fitness_dict,
             num_children=num_children,
-            probability=probability, 
-            current_gen=gen, 
+            probability=probability,
+            current_gen=gen,
+            gens=gens
+        )
+
+        # Unisco i nuovi membri ai precedenti
+        combined = current_best + new_members
+        vmessage(f"Current Population = {[getSPName(individual) for individual in combined]}")
+
+        # Calcolo la fitness ({name : elo}) degli individui della popolazione
+        # Nota: dato che sono già ordinati posso rimuovere gli "extra"
+
+        if gen == 0:
+            fitness_dict = getFitness(combined, mock) #alla prima iterazione non ci sono i fantasmi
+        else:
+            fitness_dict = getFitness(combined + ghosts, mock) #alla prima iterazione non ci sono i fantasmi
+        vmessage(f"Fitness_dict (current generation) = {fitness_dict}")
+        vmessage(f"Ordered Scoreboard (current generation) = {[name for name in fitness_dict]}")
+
+        # Seleziono solo i migliori
+        current_best = select_best_with_ghosts(combined, fitness_dict, popsize, ghosts)
+        ghosts = select_ghosts(combined, current_best, gen, fitness_dict, ghosts)
+
+        vmessage(f"Current best after select_best = {[getSPName(individual) for individual in current_best]}")
+        vmessage(f"Current ghosts after select_ghosts = {[getSPName(individual) for individual in ghosts]}")
+
+    return current_best
+def run_without_ghosts(pop, gens, popsize, num_children, probability, verbose=False, mock=False):
+    tournament.clear_old_results_csv(tournament_result_history_file) #SVUOTA il file dei risultati storici ogni volta che l'algoritmo viene attivato
+
+    fitness_dict = getFitness(pop, mock) # True = Mock
+
+    for gen in range(gens):
+        log.info(f"=== GENERATION {gen} ===")
+
+        if verbose:
+            best = max(
+                pop,
+                key=lambda individual: fitness_dict[getSPName(individual)]
+            )
+
+            log.info(f"The best so far is {getSPName(best)} with fitness {fitness_dict[getSPName(best)]}")
+
+        # Creo i nuovi membri
+        new_members = generate_new_members(
+            pop=pop,
+            fitness_dict=fitness_dict,
+            num_children=num_children,
+            probability=probability,
+            current_gen=gen,
             gens=gens
         )
 
         # Unisco i nuovi membri ai precedenti
         combined = pop + new_members
-        vmessage(f"Combined Population = {combined}", debug=True)
-        log.info(f"Combined Names = {[getSPName(individual) for individual in combined]}")
+        vmessage(f"Combined Population = {combined}")
+        vmessage(f"Combined Names = {[getSPName(individual) for individual in combined]}")
 
-        # Calcolo la fitness ({name : elo}) degli individui della popolazione 
+        # Calcolo la fitness ({name : points}) degli individui della popolazione
         # Nota: dato che sono già ordinati posso rimuovere gli "extra"
 
         fitness_dict = getFitness(combined, mock)
         vmessage(f"Fitness_dict (current generation) = {fitness_dict}")
 
         # Seleziono solo i migliori
-        pop = select_best(combined, fitness_dict, popsize)
+        pop = select_best_withouth_ghosts(combined, fitness_dict, popsize)
 
         vmessage(f"Pop after select_best = {pop}", debug=True)
         vmessage(f"Best so far = {[getSPName(individual) for individual in pop]}")
-        tournament.clear_old_logs(CONFIG["process_log_folder"])
 
     return pop
+
+def run(current_best, gens, popsize, num_children, probability, verbose=False, mock=False, allow_ghosts=False):
+    if allow_ghosts:
+        return run_with_ghosts(current_best, gens, popsize, num_children, probability, verbose, mock)
+    else:
+        return run_without_ghosts(current_best, gens, popsize, num_children, probability, verbose, mock)
+
+
+def select_ghosts(current_pop, current_best, gen, fitness_dict, current_ghosts):
+    ghosts = []
+    max_ghosts = min(CONFIG['gen_alg_max_ghosts'], len(current_pop) - len(current_best))
+    current_best_names = [getSPName(i) for i in current_best]
+    if gen == 0: #alla prima iterazione i fantasmi sono i perdenti
+        current_pop_names = [getSPName(i) for i in current_pop]
+        for player_name in current_pop_names:
+            if player_name not in current_best_names:
+                ghosts.append(getPlayerByName(player_name, current_pop))
+            if len(ghosts) == max_ghosts:
+                break
+        for ghost in ghosts:
+            ghost["superPlayerName"] += 'ghost'
+            ghost["playerW"]["name"] += 'ghost'
+            ghost["playerB"]["name"] += 'ghost'
+        return ghosts
+    else: #nelle altre iterazioni sono i caduti delle generazioni precedenti
+        for player_name in fitness_dict:
+            if player_name not in current_best_names:
+                if player_name.endswith('ghost'):
+                    ghosts.append(getPlayerByName(player_name, current_ghosts))
+                else:
+                    ghosts.append(getPlayerByName(player_name, current_pop))
+            if len(ghosts) == max_ghosts:
+                break
+        for ghost in ghosts:
+            if not ghost["superPlayerName"].endswith('ghost'):
+                ghost["superPlayerName"] += 'ghost'
+                ghost["playerW"]["name"] += 'ghost'
+                ghost["playerB"]["name"] += 'ghost'
+        return ghosts
+
+
 
 
 if __name__ == "__main__":
@@ -278,25 +376,26 @@ if __name__ == "__main__":
     sigma = CONFIG["gen_alg_sigma"] # Variazione durante le iterazioni (moderata)
 
     mock = CONFIG["gen_alg_mock"] #Per mockare le partite
-
+    allow_ghosts = CONFIG["gen_alg_allow_ghosts"] #Per aggiungere i fantasmi ai tornei
     log.info("=== Starting ===")
 
     # Run GA
     final_pop = run(
-        pop=generate_base(popsize, delta, verbose),
+        current_best=generate_base(popsize, delta, verbose),
         gens=gens,
         popsize=popsize,
         num_children=num_children,
         probability=sigma,
         verbose=verbose,
-        mock=mock
+        mock=mock,
+        allow_ghosts=allow_ghosts
     )
 
     log.info("=== FINAL pop ===")
     log.info(f"Final pop names = {[getSPName(player) for player in final_pop]}")
     
-    vmessage(f"Final pop = {final_pop}", debug=True)
-    vmessage(f"Fitness dict (history of all players) = {elo.calculate_points_ratings_sorted(tournament_result_history_file)}", debug=True)
+    vmessage(f"Final pop = {final_pop}")
+    vmessage(f"Fitness dict (history of all players) = {elo.calculate_points_ratings_sorted(tournament_result_history_file)}")
 
     with open(final_population_path, "w") as f:
         json.dump(final_pop, f, indent=2)

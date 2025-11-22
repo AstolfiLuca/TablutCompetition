@@ -32,7 +32,7 @@ public class Server implements Runnable {
 	/**
 	 * Timeout for waiting for a client to connect
 	 */
-	public static int connectionTimeout = 300;
+	public static int connectionTimeout = 1800;
 
 	/**
 	 * State of the game
