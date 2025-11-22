@@ -4,6 +4,7 @@ import time
 import glob
 import json
 import random
+import socket
 import itertools
 import subprocess
 from datetime import datetime
@@ -11,7 +12,7 @@ from multiprocessing import Lock, Manager, Pool, Value
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from config.config_reader import CONFIG
-from config.logger import setup_logger, vmessage, verbose
+from config.logger import setup_logger, vmessage
 
 log = setup_logger(__name__)
 
@@ -21,9 +22,21 @@ n_combination = Value('i', 1)
 # Global manager for shared locks (initialized in run_tournament)
 csv_lock = None
 
-# --------------------------
-#   PARALLEL WORKER
-# --------------------------
+def get_free_ports(count=1):
+
+    ports = []
+    sockets = []
+    try:
+        for _ in range(count):
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.bind(('', 0))
+            ports.append(s.getsockname()[1])
+            sockets.append(s)
+    finally:
+        for s in sockets:
+            s.close()
+    return ports
+
 
 def init_worker(lock):
     global csv_lock
@@ -31,21 +44,34 @@ def init_worker(lock):
     csv_lock = lock
 
 def clear_old_results_csv(file_path):
+    # Crea il file se non esiste o legge l'header se esiste
+    if not os.path.exists(file_path):
+        with open(file_path, 'w') as f:
+            pass # Crea file vuoto
+        return
+
     with open(file_path, 'r') as f:
         header = f.readline()
 
     with open(file_path, 'w') as f:
         f.write(header)
-        
+
     vmessage(f"File '{file_path}' svuotato con successo (header mantenuto).", debug=True)
 
 
 def clear_old_logs(folder):
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+        return
+
     for nome_elemento in os.listdir(folder):
         percorso_completo = os.path.join(folder, nome_elemento)
 
         if os.path.isfile(percorso_completo):
-            os.remove(percorso_completo)
+            try:
+                os.remove(percorso_completo)
+            except Exception as e:
+                vmessage(f"Impossibile rimuovere {percorso_completo}: {e}", error=True)
 
     vmessage(f"Cartella {folder} svuotata con successo.", debug=True)
 
@@ -62,7 +88,8 @@ def load_superplayers_from_file(filename):
 def run_server(white_port, black_port):
     os.makedirs(CONFIG["process_log_folder"], exist_ok=True)
 
-    log_file_path = os.path.join(CONFIG["process_log_folder"], str(white_port) + str(black_port) + CONFIG["server"]["log_file"])
+    # Nome log univoco basato sulle porte
+    log_file_path = os.path.join(CONFIG["process_log_folder"], f"Srv_{white_port}_{black_port}" + CONFIG["server"]["log_file"])
 
     cmd = [
         "java",
@@ -71,7 +98,7 @@ def run_server(white_port, black_port):
         CONFIG["server"]["main_class"]
     ] + CONFIG["server"]["parameters"] + ["-wp", str(white_port), "-bp", str(black_port)]
 
-    vmessage(f"Avvio del server... Log su: {log_file_path}", debug=True)
+    vmessage(f"Avvio del server... il file di log si chiamerebbe: {log_file_path} se non l'avessimo piallato", debug=True)
 
     process = subprocess.Popen(
         cmd,
@@ -87,7 +114,8 @@ def run_server(white_port, black_port):
 def run_client(player, port):
     os.makedirs(CONFIG["process_log_folder"], exist_ok=True)
 
-    log_file_path = os.path.join(CONFIG["process_log_folder"], player["name"] + ".logs")
+    # Aggiungiamo la porta al nome del log per evitare conflitti se lo stesso player gioca 2 game contemporanei
+    log_file_path = os.path.join(CONFIG["process_log_folder"], f"{player['name']}_{port}.logs")
 
     cmd = [
         "java",
@@ -115,48 +143,62 @@ def run_client(player, port):
     return process
 
 
-def match_bw_players(p1, p2, port=None):
-    white_port = port
-    black_port = white_port + 1
+def match_bw_players(p1, p2):
+    try:
+        ports = get_free_ports(2)
+        white_port = ports[0]
+        black_port = ports[1]
+    except Exception as e:
+        log.error(f"Errore nel reperire porte libere: {e}")
+        return
 
-    vmessage("Avvio del server...", debug=True)
+    vmessage(f"Avvio match su porte dinamiche W:{white_port} B:{black_port}", debug=True)
     server_process = run_server(white_port=white_port, black_port=black_port)
-    time.sleep(1)
+    time.sleep(0.5)
 
-    client1_port =  white_port if str(p1['role']).lower() == 'white' else black_port
+    client1_port = white_port if str(p1['role']).lower() == 'white' else black_port
     vmessage(f"Avvio del client {p1['role']} con nome {p1['name']}...", debug=True)
     client1_process = run_client(p1, port=client1_port)
-    time.sleep(1)
 
-    client2_port =  white_port if str(p2['role']).lower() == 'white' else black_port
+    client2_port = white_port if str(p2['role']).lower() == 'white' else black_port
     vmessage(f"Avvio del client {p2['role']} con nome {p2['name']}...", debug=True)
     client2_process = run_client(p2, port=client2_port)
-    time.sleep(1)
 
-    for process in [server_process, client1_process, client2_process]:
-        process.wait()
-        vmessage(f"Processo (PID: {process.pid}) ha terminato.", debug=True)
+    # Timeout di sicurezza per evitare processi appesi per sempre
+    TIMEOUT_GLOBAL = 1800 # 30 minuti max per partita
+
+    processes = [server_process, client1_process, client2_process]
+
+    for p in processes:
+        try:
+            p.wait(timeout=TIMEOUT_GLOBAL)
+        except subprocess.TimeoutExpired:
+            vmessage(f"Processo {p.pid} in timeout. Kill forzato.", error=True)
+            p.kill()
 
     vmessage("Tutti i processi del game hanno terminato", debug=True)
 
 
-def run_single_game(sp_white, sp_black, port, game_num):
+def run_single_game(sp_white, sp_black, game_num):
     global n_combination, n_combination_lock
-    
+
     with n_combination_lock:
         log.info(f"{str(n_combination.value).rjust(3)} - Game_{game_num}: WHITE: {sp_white['playerW']['name']} vs BLACK: {sp_black['playerB']['name']}")
         n_combination.value += 1
-    
-    match_bw_players(sp_white["playerW"], sp_black["playerB"], port)
+
+    match_bw_players(sp_white["playerW"], sp_black["playerB"])
 
 
-def match_bw_superplayers(sp1, sp2, port):
+def match_bw_superplayers(sp1, sp2):
     with ThreadPoolExecutor(max_workers=2) as executor:
-        game1 = executor.submit(run_single_game, sp1, sp2, port, 1)
-        game2 = executor.submit(run_single_game, sp2, sp1, port + 2, 2)
-        
+        game1 = executor.submit(run_single_game, sp1, sp2, 1)
+        game2 = executor.submit(run_single_game, sp2, sp1, 2)
+
         for future in as_completed([game1, game2]):
-            future.result()
+            try:
+                future.result()
+            except Exception as e:
+                vmessage(f"Errore durante l'esecuzione del game: {e}", error=True)
 
 
 def write_on_csv(filename, headers, row):
@@ -181,19 +223,23 @@ def lookup_match_results(playerW, playerB):
     files_found = glob.glob(pattern)
 
     if not files_found:
-        print(f"Nessun log trovato per pattern {pattern}, ritorno WW, anche senza sapere quale sia il vero vincitore")
-        return "WW"
+        print(f"Nessun log trovato per pattern {pattern}, ritorno D (DUMMY)")
+        return "D"
 
+    # Prendi il file più recente se ce ne sono più di uno
+    files_found.sort(key=os.path.getmtime, reverse=True)
     filename = files_found[0]
 
-    vmessage(f"Log del game salvato in {filename}", debug=True)
+    vmessage(f"Log del game trovato con nome {filename}", debug=True)
 
     with open(filename, 'r') as f:
         rows = f.readlines()
-        
+
         for row in reversed(rows):
-            if row:
+            if row.strip():
                 return row.strip()
+    vmessage("Ritorno D come risultato del game", error=True)
+    return "D" # Fallback
 
 
 def store_match_results(sp1, sp2, mock=False):
@@ -227,7 +273,7 @@ def store_match_results(sp1, sp2, mock=False):
 
     else:
         sp1_points = random.choice([0, 0.5, 1, 1.5, 2])
-    
+
     sp2_points = 2 - sp1_points
 
     headers = ["Timestamp", "SuperPlayer_1", "SuperPlayer_2", "Punteggio_SP1", "Punteggio_SP2"]
@@ -244,16 +290,19 @@ def store_match_results(sp1, sp2, mock=False):
     write_on_csv(CONFIG["tournament_result_history_file"], headers, row)
 
 def run_single_match(args):
-    sp1, sp2, mock, idx = args
-    # Offset aumentato a 5 per permettere 2 game in parallelo (ogni game usa 2 porte)
-    offset = 20
+    sp1, sp2, mock = args
 
-    port = CONFIG["port"] + (idx * 5) + offset
+
+
+    uniqueId = f"{sp1['superPlayerName']}_vs_{sp2['superPlayerName']}"
+    vmessage(f"{uniqueId} - AVVIATO")
 
     if not mock:
-        match_bw_superplayers(sp1, sp2, port)
+        match_bw_superplayers(sp1, sp2)
 
+    vmessage(f"{uniqueId} - TERMINATO")
     store_match_results(sp1, sp2, mock)
+    vmessage(f"{uniqueId} - SALVATO")
 
 
 def run_tournament(superplayers_file, mock=False):
@@ -266,13 +315,12 @@ def run_tournament(superplayers_file, mock=False):
     # Ottengo superplayers
     superplayers = load_superplayers_from_file(superplayers_file)
 
-    # Creo le coppie che si sfideranno - con idx per la successione delle porte
-    combinations = [(sp1, sp2, mock, idx) for idx, (sp1, sp2) in enumerate(itertools.combinations(superplayers, 2))]
+    # Creo le coppie che si sfideranno -
+    combinations = [(sp1, sp2, mock) for (sp1, sp2) in itertools.combinations(superplayers, 2)]
 
     log.info(f"Totale match da eseguire: {len(combinations)} ({len(combinations) * 2} Games)")
 
-    # Default: usa meta' delle risorse per non oversaturare
-    num_processes = max(1, os.cpu_count() - 2)
+    num_processes = max(1, os.cpu_count() - 4)
 
     # Parallelizzazione semplice
     with Manager() as manager:
@@ -280,9 +328,9 @@ def run_tournament(superplayers_file, mock=False):
 
         with Pool(processes=num_processes, initializer=init_worker, initargs=(csv_lock,)) as p:
             p.map(run_single_match, combinations)
-        
+
         csv_lock = None
-    
+
     with n_combination_lock:
         n_combination.value = 1
 
