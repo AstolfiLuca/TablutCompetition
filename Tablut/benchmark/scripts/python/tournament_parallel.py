@@ -236,10 +236,20 @@ def lookup_match_results(playerW, playerB):
         f"_{playerW['name']}_vs_{playerB['name']}_*"
     )
 
-    files_found = glob.glob(pattern)
+    max_retries = 3
+    retry_delay = 1.0
+    files_found = []
+    for attempt in range(max_retries):
+        files_found = glob.glob(pattern)
+        if files_found:
+            break
+
+        if attempt < max_retries - 1:
+
+            time.sleep(retry_delay)
 
     if not files_found:
-        vmessage(f"Nessun log trovato per pattern {pattern}, ritorno D (DUMMY)", error=True)
+        vmessage(f"Nessun log trovato per pattern {pattern} dopo {max_retries} tentativi. Ritorno D (DUMMY)", error=True)
         return "D"
 
     # Prendi il file più recente se ce ne sono più di uno
