@@ -59,17 +59,16 @@ public class GameAshtonTablut implements Game, aima.core.search.adversarial.Game
 		this.cache_size = cache_size;
 		this.movesWithutCapturing = 0;
 
-		Path p = Paths.get(logs_folder + File.separator + "_" + whiteName + "_vs_" + blackName + "_"
-				+ new Date().getTime() + "_gameLog.txt");
+		Path p = Paths.get(logs_folder + File.separator + "_" + whiteName + "_vs_" + blackName + "_" + new Date().getTime() + "_gameLog.txt");
 		p = p.toAbsolutePath();
 		this.gameLogName = p.toString();
 		File gamefile = new File(this.gameLogName);
 		try {
 			File f = new File(logs_folder);
 			f.mkdirs();
-			if (!gamefile.exists()) {
+			if (!gamefile.exists()) 
 				gamefile.createNewFile();
-			}
+			
 			this.gameLog = gamefile;
 			fh = null;
 			fh = new FileHandler(gameLogName, true);

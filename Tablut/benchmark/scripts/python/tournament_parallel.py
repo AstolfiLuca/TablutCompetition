@@ -8,6 +8,7 @@ import itertools
 import subprocess
 from datetime import datetime
 from multiprocessing import Lock, Manager, Pool, Value
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from config.config_reader import CONFIG
 from config.logger import setup_logger, vmessage, verbose
@@ -18,17 +19,16 @@ n_combination_lock = Lock()
 n_combination = Value('i', 1)
 
 # Global manager for shared locks (initialized in run_tournament)
-_manager = None
-_csv_lock = None
+csv_lock = None
 
 # --------------------------
 #   PARALLEL WORKER
 # --------------------------
 
-def _init_worker(lock):
-    """Initialize worker process with shared lock"""
-    global _csv_lock
-    _csv_lock = lock
+def init_worker(lock):
+    global csv_lock
+
+    csv_lock = lock
 
 def clear_old_results_csv(file_path):
     with open(file_path, 'r') as f:
@@ -98,13 +98,11 @@ def run_client(player, port):
         str(CONFIG["client"]["timeout"]), 
         CONFIG["client"]["server_ip"], 
         player["name"], 
-        json.dumps(player["heuristics"])
-    ] + [str(port)]
+        json.dumps(player["heuristics"]),
+        str(port)
+    ]
 
-    vmessage(
-        f"Avvio del client {player['name']} con timeout {CONFIG['client']['timeout']} secondi... Log su: {log_file_path}",
-        debug=True
-    )
+    vmessage(f"Avvio del client {player['name']} con timeout {CONFIG['client']['timeout']} secondi... Log su: {log_file_path}", debug=True)
 
     process = subprocess.Popen(
         cmd,
@@ -142,33 +140,33 @@ def match_bw_players(p1, p2, port=None):
     vmessage("Tutti i processi del game hanno terminato", debug=True)
 
 
-def match_bw_superplayers(sp1, sp2, port):
+def run_single_game(sp_white, sp_black, port, game_num):
     global n_combination, n_combination_lock
-
+    
     with n_combination_lock:
-        log.info(f"{str(n_combination.value).rjust(3)} - Game_1: WHITE: {sp1['playerW']['name']} vs BLACK: {sp2['playerB']['name']}")
+        log.info(f"{str(n_combination.value).rjust(3)} - Game_{game_num}: WHITE: {sp_white['playerW']['name']} vs BLACK: {sp_black['playerB']['name']}")
         n_combination.value += 1
+    
+    match_bw_players(sp_white["playerW"], sp_black["playerB"], port)
 
-    match_bw_players(sp1["playerW"], sp2["playerB"], port)
 
-    with n_combination_lock:
-        log.info(f"{str(n_combination.value).rjust(3)} - Game_2: WHITE: {sp2['playerW']['name']} vs BLACK: {sp1['playerB']['name']}")
-        n_combination.value += 1
-
-    match_bw_players(sp2["playerW"], sp1["playerB"], port)
-
+def match_bw_superplayers(sp1, sp2, port):
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        game1 = executor.submit(run_single_game, sp1, sp2, port, 1)
+        game2 = executor.submit(run_single_game, sp2, sp1, port + 2, 2)
+        
+        for future in as_completed([game1, game2]):
+            future.result()
 
 
 def write_on_csv(filename, headers, row):
     vmessage(f"Scrivendo i risultati su {filename}", debug=True)
 
-    file_exists = os.path.exists(filename)
-
-    with _csv_lock:
+    with csv_lock:
         with open(filename, mode='a', newline='') as file_csv:
             writer = csv.writer(file_csv, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
-            if not file_exists:
+            if not os.path.exists(filename):
                 writer.writerow(headers)
 
             writer.writerow(row)
@@ -244,17 +242,12 @@ def store_match_results(sp1, sp2, mock=False):
     write_on_csv(CONFIG["tournament_result_by_generation_file"], headers, row)
     write_on_csv(CONFIG["tournament_result_history_file"], headers, row)
 
-
-# --------------------------
-#   PARALLEL WORKER
-# --------------------------
-
-def _run_single_match(args):
+def run_single_match(args):
     sp1, sp2, mock, idx = args
-    # Offset to reintantiate next white/black ports
-    offset = 3
+    # Offset aumentato a 5 per permettere 2 game in parallelo (ogni game usa 2 porte)
+    offset = 5
 
-    port = CONFIG["port"] + (idx * 2) + offset
+    port = CONFIG["port"] + (idx * 4) + offset
 
     if not mock:
         match_bw_superplayers(sp1, sp2, port)
@@ -262,12 +255,8 @@ def _run_single_match(args):
     store_match_results(sp1, sp2, mock)
 
 
-# --------------------------
-#   TOURNAMENT MAIN
-# --------------------------
-
 def run_tournament(superplayers_file, mock=False):
-    global _manager, _csv_lock
+    global csv_lock
 
     # Pulisco risultati precedenti
     clear_old_logs(CONFIG["process_log_folder"])
@@ -286,15 +275,14 @@ def run_tournament(superplayers_file, mock=False):
 
     # Parallelizzazione semplice
     with Manager() as manager:
-        _manager = manager
-
-
         csv_lock = manager.Lock()
-        with Pool(processes=num_processes, initializer=_init_worker, initargs=(csv_lock,)) as p:
-            p.map(_run_single_match, combinations)
-                # Clean up globals
+
+        with Pool(processes=num_processes, initializer=init_worker, initargs=(csv_lock,)) as p:
+            p.map(run_single_match, combinations)
         
-        _manager = None
-        _csv_lock = None
+        csv_lock = None
+    
+    with n_combination_lock:
+        n_combination.value = 0
 
     log.info("Torneo terminato")
