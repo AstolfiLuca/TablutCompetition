@@ -358,7 +358,7 @@ public class Server implements Runnable {
 			fh = new FileHandler(sysLogName, true);
 			loggSys.addHandler(fh);
 			fh.setFormatter(new SimpleFormatter());
-			loggSys.setLevel(Level.FINE);
+			loggSys.setLevel(Level.INFO);
 			loggSys.fine("Accensione server");
 		} catch (Exception e) {
 			e.printStackTrace();

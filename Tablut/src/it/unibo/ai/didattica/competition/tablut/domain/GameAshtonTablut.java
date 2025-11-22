@@ -73,6 +73,7 @@ public class GameAshtonTablut implements Game, aima.core.search.adversarial.Game
 			this.gameLog = gamefile;
 			fh = null;
 			fh = new FileHandler(gameLogName, true);
+			this.fh.setFilter(record -> record.getLevel() == Level.INFO);
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -80,7 +81,7 @@ public class GameAshtonTablut implements Game, aima.core.search.adversarial.Game
 		this.loggGame = Logger.getLogger("GameLog");
 		loggGame.addHandler(this.fh);
 		this.fh.setFormatter(new SimpleFormatter());
-		loggGame.setLevel(Level.FINE);
+		loggGame.setLevel(Level.INFO);
 		loggGame.fine("Players:\t" + whiteName + "\tvs\t" + blackName);
 		loggGame.fine("Repeated moves allowed:\t" + repeated_moves_allowed + "\tCache:\t" + cache_size);
 		loggGame.fine("Inizio partita");
@@ -770,7 +771,7 @@ public class GameAshtonTablut implements Game, aima.core.search.adversarial.Game
 
 	@Override
 	public void endGame(State state) {
-		this.loggGame.fine("Stato:\n"+state.toString());
+		this.loggGame.info("Stato:\n"+state.toString());
 	}
 
 

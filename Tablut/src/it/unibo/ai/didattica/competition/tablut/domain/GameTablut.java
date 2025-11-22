@@ -39,6 +39,7 @@ public class GameTablut implements Game {
 		try
 		{
 			fh = new FileHandler(gameLogName, true);
+			this.fh.setFilter(record -> record.getLevel() == Level.INFO);
 		}
 		catch(Exception e)
 		{
@@ -48,7 +49,7 @@ public class GameTablut implements Game {
 		this.loggGame = Logger.getLogger("GameLog");
 		loggGame.addHandler(this.fh);
 		this.fh.setFormatter(new SimpleFormatter());
-		loggGame.setLevel(Level.FINE);
+		loggGame.setLevel(Level.INFO);
 		loggGame.fine("Inizio partita");
 	}
 

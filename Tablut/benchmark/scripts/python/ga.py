@@ -273,6 +273,7 @@ def run(pop, gens, popsize, num_children, probability, verbose=False, mock=False
 
         vmessage(f"Pop after select_best = {pop}")
         log.info(f"Best so far = {[getSPName(individual) for individual in pop]}")
+        tournament.clear_old_logs(CONFIG["process_log_folder"])
 
     return pop
 
