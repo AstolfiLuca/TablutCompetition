@@ -234,7 +234,7 @@ def run(pop, gens, popsize, num_children, probability, verbose=False, mock=False
                 key=lambda individual: fitness_dict[getSPName(individual)]
             )
 
-            vmessage(f"The best so far is {getSPName(best)} with fitness {fitness_dict[getSPName(best)]}")
+            log.info(f"The best so far is {getSPName(best)} with fitness {fitness_dict[getSPName(best)]}")
 
         # Creo i nuovi membri
         new_members = generate_new_members(
@@ -261,7 +261,7 @@ def run(pop, gens, popsize, num_children, probability, verbose=False, mock=False
         pop = select_best(combined, fitness_dict, popsize)
 
         vmessage(f"Pop after select_best = {pop}", debug=True)
-        log.info(f"Best so far = {[getSPName(individual) for individual in pop]}")
+        vmessage(f"Best so far = {[getSPName(individual) for individual in pop]}")
         tournament.clear_old_logs(CONFIG["process_log_folder"])
 
     return pop

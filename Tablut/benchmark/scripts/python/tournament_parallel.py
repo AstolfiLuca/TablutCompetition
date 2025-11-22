@@ -181,7 +181,8 @@ def lookup_match_results(playerW, playerB):
     files_found = glob.glob(pattern)
 
     if not files_found:
-        raise FileNotFoundError(f"Nessun log trovato per pattern {pattern}")
+        print(f"Nessun log trovato per pattern {pattern}, ritorno WW, anche senza sapere quale sia il vero vincitore")
+        return "WW"
 
     filename = files_found[0]
 
@@ -245,9 +246,9 @@ def store_match_results(sp1, sp2, mock=False):
 def run_single_match(args):
     sp1, sp2, mock, idx = args
     # Offset aumentato a 5 per permettere 2 game in parallelo (ogni game usa 2 porte)
-    offset = 5
+    offset = 20
 
-    port = CONFIG["port"] + (idx * 4) + offset
+    port = CONFIG["port"] + (idx * 5) + offset
 
     if not mock:
         match_bw_superplayers(sp1, sp2, port)
@@ -283,6 +284,6 @@ def run_tournament(superplayers_file, mock=False):
         csv_lock = None
     
     with n_combination_lock:
-        n_combination.value = 0
+        n_combination.value = 1
 
     log.info("Torneo terminato")
