@@ -236,7 +236,7 @@ def getFitness(pop, mock=False):
     tournament.run_tournament(superplayers_path, mock)
 
     # Calcola l'elo 
-    fitness_dict = elo.calculate_elo_ratings_sorted(CONFIG["tournament_result_by_generation_file"])
+    fitness_dict = elo.calculate_points_ratings_sorted(CONFIG["tournament_result_by_generation_file"])
 
     # Restituisci la fitness {name : elo}
     return fitness_dict
@@ -402,7 +402,7 @@ if __name__ == "__main__":
     log.info(f"Final pop names = {[getSPName(player) for player in final_pop]}")
     
     vmessage(f"Final pop = {final_pop}")
-    vmessage(f"Fitness dict (history of all players) = {elo.calculate_elo_ratings_sorted(tournament_result_history_file)}")
+    vmessage(f"Fitness dict (history of all players) = {elo.calculate_points_ratings_sorted(tournament_result_history_file)}")
 
     with open(final_population_path, "w") as f:
         json.dump(final_pop, f, indent=2)

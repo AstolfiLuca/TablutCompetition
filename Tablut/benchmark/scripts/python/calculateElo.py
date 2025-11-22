@@ -98,6 +98,64 @@ def calculate_elo_ratings_sorted(file_path):
 
     return final_ratings_dict
 
+import csv
+
+def calculate_points_ratings_sorted(percorso_file):
+
+    punteggi_totali = {}
+
+    try:
+        with open(percorso_file, mode='r', encoding='utf-8') as file:
+            reader = csv.reader(file)
+
+            # Salta l'intestazione (Timestamp, SuperPlayer_1, ...)
+            # Gestisce il caso in cui il file sia vuoto o abbia solo l'header
+            try:
+                header = next(reader)
+            except StopIteration:
+                print("Il file CSV è vuoto.")
+                return {}
+
+            # Itera su ogni riga (match) del CSV
+            for row in reader:
+                # Salta eventuali righe vuote
+                if not row:
+                    continue
+
+                try:
+                    # Estrazione dati in base alla struttura:
+                    # [0]Timestamp, [1]SP1, [2]SP2, [3]Score1, [4]Score2
+                    player_1 = row[1].strip()
+                    player_2 = row[2].strip()
+                    score_1 = float(row[3])
+                    score_2 = float(row[4])
+
+                    # Aggiorna punteggio Player 1
+                    # .get(k, 0) restituisce il valore corrente o 0 se non esiste ancora
+                    punteggi_totali[player_1] = punteggi_totali.get(player_1, 0.0) + score_1
+
+                    # Aggiorna punteggio Player 2
+                    punteggi_totali[player_2] = punteggi_totali.get(player_2, 0.0) + score_2
+
+                except (ValueError, IndexError) as e:
+                    log.error(f"Attenzione: riga malformata ignorata -> {row} ({e})")
+
+        # --- ORDINAMENTO ---
+        # Ordina il dizionario in base ai Valori (punteggi) in ordine decrescente.
+        # Restituisce un nuovo dizionario ordinato.
+        classifica_ordinata = dict(
+            sorted(punteggi_totali.items(), key=lambda item: item[1], reverse=True)
+        )
+
+        return classifica_ordinata
+
+    except FileNotFoundError:
+        log.error(f"Errore: Il file '{percorso_file}' non è stato trovato.")
+        return {}
+    except Exception as e:
+        log.error(f"Si è verificato un errore imprevisto: {e}")
+        return {}
+
 
 if __name__ == "__main__":
     print(calculate_elo_ratings_sorted(CONFIG["tournament_result_history_file"]))
