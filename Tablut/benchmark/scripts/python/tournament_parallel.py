@@ -7,18 +7,28 @@ import random
 import itertools
 import subprocess
 from datetime import datetime
-from multiprocessing import Lock, Pool, Value
+from multiprocessing import Lock, Manager, Pool, Value
 
 from config.config_reader import CONFIG
 from config.logger import setup_logger, vmessage, verbose
 
 log = setup_logger(__name__)
 
-csv_lock_server = Lock()
-
 n_combination_lock = Lock()
 n_combination = Value('i', 1)
 
+# Global manager for shared locks (initialized in run_tournament)
+_manager = None
+_csv_lock = None
+
+# --------------------------
+#   PARALLEL WORKER
+# --------------------------
+
+def _init_worker(lock):
+    """Initialize worker process with shared lock"""
+    global _csv_lock
+    _csv_lock = lock
 
 def clear_old_results_csv(file_path):
     with open(file_path, 'r') as f:
@@ -63,13 +73,11 @@ def run_server(white_port, black_port):
 
     vmessage(f"Avvio del server... Log su: {log_file_path}", debug=True)
 
-    with csv_lock_server:
-        with open(log_file_path, "a") as log_file:
-            process = subprocess.Popen(
-                cmd,
-                stdout=log_file,
-                stderr=log_file
-            )
+    process = subprocess.Popen(
+        cmd,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL
+    )
 
     vmessage(f"Processo server avviato in background con PID: {process.pid}", debug=True)
 
@@ -98,12 +106,11 @@ def run_client(player, port):
         debug=True
     )
 
-    with open(log_file_path, "a") as log_file:
-        process = subprocess.Popen(
-            cmd,
-            stdout=log_file,
-            stderr=log_file
-        )
+    process = subprocess.Popen(
+        cmd,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL
+    )
 
     vmessage(f"Processo Client avviato in background con PID: {process.pid}", debug=True)
 
@@ -157,13 +164,14 @@ def write_on_csv(filename, headers, row):
 
     file_exists = os.path.exists(filename)
 
-    with open(filename, mode='a', newline='') as file_csv:
-        writer = csv.writer(file_csv, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+    with _csv_lock:
+        with open(filename, mode='a', newline='') as file_csv:
+            writer = csv.writer(file_csv, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
-        if not file_exists:
-            writer.writerow(headers)
+            if not file_exists:
+                writer.writerow(headers)
 
-        writer.writerow(row)
+            writer.writerow(row)
 
 
 def lookup_match_results(playerW, playerB):
@@ -259,6 +267,8 @@ def _run_single_match(args):
 # --------------------------
 
 def run_tournament(superplayers_file, mock=False):
+    global _manager, _csv_lock
+
     # Pulisco risultati precedenti
     clear_old_logs(CONFIG["process_log_folder"])
     clear_old_results_csv(CONFIG["tournament_result_by_generation_file"])
@@ -275,10 +285,16 @@ def run_tournament(superplayers_file, mock=False):
     num_processes = max(1, os.cpu_count() - 2)
 
     # Parallelizzazione semplice
-    with Pool(processes=num_processes) as p:
-        p.map(_run_single_match, combinations)
+    with Manager() as manager:
+        _manager = manager
 
-    with n_combination_lock:
-        n_combination.value = 0
+
+        csv_lock = manager.Lock()
+        with Pool(processes=num_processes, initializer=_init_worker, initargs=(csv_lock,)) as p:
+            p.map(_run_single_match, combinations)
+                # Clean up globals
+        
+        _manager = None
+        _csv_lock = None
 
     log.info("Torneo terminato")
