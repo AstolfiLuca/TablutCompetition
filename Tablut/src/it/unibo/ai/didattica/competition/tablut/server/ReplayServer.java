@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
  */
 public class ReplayServer extends Server {
 	protected String replayFilePath;
-	protected int timeBetweenTurns = 1000; // ms
+	protected int timeBetweenTurns = 500; // ms
 	protected boolean initializedGui = false;
 
 	public ReplayServer(String replayFilePath, int cacheSize, int numErrors, int repeated, int game, boolean gui) {
@@ -35,7 +35,6 @@ public class ReplayServer extends Server {
 	public void run() {
 		try (BufferedReader reader = new BufferedReader(new FileReader(replayFilePath))) {
 			parseReader(reader);
-			System.exit(0);
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.exit(-1);
@@ -77,7 +76,7 @@ public class ReplayServer extends Server {
 		State.Turn lastTurn = State.Turn.WHITE;
 
 		while ((line = reader.readLine()) != null) {
-			line = line.trim();
+			line = line.strip();
 
 			if (linesUntilTurn >= 0) {
 				linesUntilTurn--;
@@ -149,16 +148,13 @@ public class ReplayServer extends Server {
 		return state;
 	}
 
-	protected void runTurn(State state) throws IOException {
+	protected void runTurn(State state) {
 		if (enableGui) {
 			if (initializedGui) {
 				theGui.update(state);
 			} else {
 				initializeGUI(state);
 				initializedGui = true;
-				System.out.println("Press enter to continue...");
-				System.in.read();
-				System.out.println("... start replay");
 			}
 		}
 		try {

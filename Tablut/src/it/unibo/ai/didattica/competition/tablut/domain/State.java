@@ -58,7 +58,7 @@ public abstract class State {
 			case "W":
 				return Pawn.WHITE;
 			case "B":
-				return Pawn.BLACK;
+				return Pawn.EMPTY;
 			case "K":
 				return Pawn.KING;
 			case "T":
