@@ -1,5 +1,17 @@
 #!/bin/bash
 
+if [ $# -lt 3 ]; then
+    echo "ERRORE: Numero di argomenti insufficiente."
+    echo "Uso: $0 <ROLE> <TIMEOUT> <SERVER_IP>"
+    exit 1
+fi
+
+if ! [[ "$2" =~ ^[0-9]+$ ]]; then
+    echo "ERRORE: Il parametro TIMEOUT ('$2') deve essere un numero intero."
+    exit 1
+fi
+
+
 ROLE=$1
 TIMEOUT=$2
 SERVER_IP=$3
