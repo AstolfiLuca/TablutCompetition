@@ -1,0 +1,48 @@
+# config.yaml
+uber_jar: &UBER_JAR ../../target/tablut_uber_jar.jar
+process_log_folder: ./logs
+
+server:
+  jar: *UBER_JAR
+  main_class: it.unibo.ai.didattica.competition.tablut.server.Server
+  parameters: ["-t","2000"]
+  log_file: server.logs
+
+client:
+  jar: *UBER_JAR
+  timeout: 2
+  server_ip: localhost
+  activate_verbose_heuristics_logs: False
+
+starting_elo: 1500
+k_factor: 32
+
+tournament_result_history_file: results/match_results_history.csv
+tournament_result_by_generation_file: results/match_results_by_generation.csv
+single_match_result_file: results/single_match_results.csv
+single_match_superplayers: ../../players/single_match_superplayers.json
+
+
+gen_alg_popsize: 2
+gen_alg_num_children: 2
+gen_alg_num_generations: 1
+gen_alg_delta: 0.4
+gen_alg_sigma: 0.35
+gen_alg_mock: False
+gen_alg_base_superplayers_path: ../../players/base_superplayers.json
+gen_alg_superplayers_path: ../../players/superplayers.json
+gen_alg_final_population_path: ../../players/final_population.json
+gen_alg_allow_ghosts: False
+gen_alg_max_ghosts: 3
+gen_alg_systemlog_server: True
+gen_alg_systemlog_client: True
+
+
+
+
+logger_level: INFO
+verbose: True
+
+
+
+

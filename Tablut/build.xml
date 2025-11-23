@@ -5,6 +5,7 @@
 
     <target name="clean">
         <delete dir="build"/>
+        <delete dir="target"/>
     </target>
 
     <target name="compile">
@@ -13,6 +14,10 @@
             <classpath>
                 <pathelement path="lib/gson-2.2.2.jar" />
                 <pathelement path="lib/commons-cli-1.4.jar" />
+                <pathelement path="lib/aima-core.jar" />
+                <pathelement path="lib/jackson-core-2.20.1.jar" />
+                <pathelement path="lib/jackson-annotations-2.20.jar" />
+                <pathelement path="lib/jackson-databind-2.20.1.jar" />
             </classpath>
         </javac>
         <copy todir="build">
@@ -25,6 +30,10 @@
             <classpath>
                 <pathelement location="lib/gson-2.2.2.jar"/>
                 <pathelement location="lib/commons-cli-1.4.jar"/>
+                <pathelement location="lib/jackson-core-2.20.1.jar" />
+                <pathelement location="lib/jackson-annotations-2.20.jar" />
+                <pathelement location="lib/jackson-databind-2.20.1.jar" />
+                <pathelement location="lib/aima-core.jar" />
                 <pathelement location="build"/>
             </classpath>
         </java>
@@ -44,10 +53,15 @@
     
     <target name="gui-server">
         <java classname="it.unibo.ai.didattica.competition.tablut.server.Server" fork="true">
-            <arg value="-g"/>
+            <arg value="-g -t 2000"/>
+
             <classpath>
                 <pathelement location="lib/gson-2.2.2.jar"/>
                 <pathelement location="lib/commons-cli-1.4.jar"/>
+                <pathelement location="lib/jackson-core-2.20.1.jar" />
+                <pathelement location="lib/jackson-annotations-2.20.jar" />
+                <pathelement location="lib/jackson-databind-2.20.1.jar" />
+                <pathelement location="lib/aima-core.jar" />
                 <pathelement location="build"/>
             </classpath>
         </java>
@@ -57,6 +71,39 @@
         <java classname="it.unibo.ai.didattica.competition.tablut.client.TablutRandomWhiteClient" fork="true">
             <classpath>
                 <pathelement location="lib/gson-2.2.2.jar"/>
+                <pathelement location="lib/commons-cli-1.4.jar"/>
+                <pathelement location="lib/jackson-core-2.20.1.jar" />
+                <pathelement location="lib/jackson-annotations-2.20.jar" />
+                <pathelement location="lib/jackson-databind-2.20.1.jar" />
+                <pathelement location="lib/aima-core.jar" />
+                <pathelement location="build"/>
+            </classpath>
+        </java>
+    </target>
+
+    <target name="tablutcrewblack">
+        <java classname="it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.baseline.BaselineBlackPlayer" fork="true">
+            <classpath>
+                <pathelement location="lib/gson-2.2.2.jar"/>
+                <pathelement location="lib/commons-cli-1.4.jar"/>
+                <pathelement location="lib/jackson-core-2.20.1.jar" />
+                <pathelement location="lib/jackson-annotations-2.20.jar" />
+                <pathelement location="lib/jackson-databind-2.20.1.jar" />
+                <pathelement location="lib/aima-core.jar" />
+                <pathelement location="build"/>
+            </classpath>
+        </java>
+    </target>
+
+    <target name="tablutcrewwhite">
+        <java classname="it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.baseline.BaselineWhitePlayer" fork="true">
+            <classpath>
+                <pathelement location="lib/gson-2.2.2.jar"/>
+                <pathelement location="lib/commons-cli-1.4.jar"/>
+                <pathelement location="lib/jackson-core-2.20.1.jar" />
+                <pathelement location="lib/jackson-annotations-2.20.jar" />
+                <pathelement location="lib/jackson-databind-2.20.1.jar" />
+                <pathelement location="lib/aima-core.jar" />
                 <pathelement location="build"/>
             </classpath>
         </java>
@@ -66,6 +113,7 @@
         <java classname="it.unibo.ai.didattica.competition.tablut.client.TablutRandomBlackClient" fork="true">
             <classpath>
                 <pathelement location="lib/gson-2.2.2.jar"/>
+                <pathelement location="lib/aima-core.jar" />
                 <pathelement location="build"/>
             </classpath>
         </java>
@@ -109,6 +157,62 @@
                 <pathelement location="build"/>
             </classpath>
         </java>
+    </target>
+
+    <target name="check-java-version">
+        <echo message="Checking Java Version..."/>
+
+        <fail message="ERROR: Java 17 or higher is required. Currently running: ${ant.java.version}">
+            <condition>
+                <not>
+                    <javaversion atleast="17"/>
+                </not>
+            </condition>
+        </fail>
+
+        <echo message="Java 17+ confirmed."/>
+    </target>
+
+    <!--Queste properties possono essere sovrascritte dal lancio di ant da riga di comando-->
+    <property name="bin.dir" location="build"/>
+    <property name="lib.dir" location="lib"/>
+    <property name="dest.dir" location="target"/>
+    <property name="dest.lib.dir" location="${dest.dir}/libs"/>
+    <property name="dest.lib.filename" value="libs"/>
+    <property name="final.jar.name" value="tablut_uber_jar"/>
+
+    <path id="project.classpath">
+        <fileset dir="${lib.dir}">
+            <include name="**/*.jar"/>
+        </fileset>
+    </path>
+
+
+    <!-- Group all dependencies into a big dependency-all.jar -->
+    <target name="copy-dependencies">
+
+        <mkdir dir="${dest.lib.dir}" />
+
+        <jar jarfile="${dest.lib.dir}/${dest.lib.filename}.jar">
+            <zipgroupfileset dir="${lib.dir}">
+                <include name="**/*.jar" />
+            </zipgroupfileset>
+        </jar>
+
+    </target>
+
+    <!-- jar it, extract above dependency-all.jar and zip it with project files -->
+    <target name="uber-jar" depends="check-java-version, clean, compile, copy-dependencies"
+            description="package, output to JAR">
+
+        <mkdir dir="${dest.dir}" />
+        <mkdir dir="${dest.lib.dir}" />
+
+        <jar jarfile="${dest.dir}/${final.jar.name}.jar" basedir="${bin.dir}">
+            <zipfileset src="${dest.lib.dir}/${dest.lib.filename}.jar"
+                        excludes="META-INF/*.SF" />
+        </jar>
+
     </target>
 
 
