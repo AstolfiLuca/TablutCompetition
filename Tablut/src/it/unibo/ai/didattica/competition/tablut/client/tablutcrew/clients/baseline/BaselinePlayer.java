@@ -14,8 +14,7 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 
 public class BaselinePlayer extends TablutHeuristicClient {
-    public final static String CLIENT_NAME = "TablutCrew";
-    public final static String TEAM_NAME = "TablutCrew Team";
+    public final static String CLIENT_NAME = "CrewPlayer";
     // If the same state of the game is reached twice, draw
     public final static int REPEATED_MOVES_ALLOWED = 0;
     public final static int CACHED_MOVES_ALLOWED = -1;
@@ -45,7 +44,7 @@ public class BaselinePlayer extends TablutHeuristicClient {
 
     public static void main(String[] args) throws UnknownHostException, IOException {
         String role = "";
-        String name = "";
+        String name = CLIENT_NAME;
         String ipAddress = "localhost";
         String weights = null;
         int timeout = 60;

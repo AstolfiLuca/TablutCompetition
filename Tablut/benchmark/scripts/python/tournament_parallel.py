@@ -365,3 +365,25 @@ def run_tournament(superplayers_file, mock=False):
         n_combination.value = 1
 
     log.info("Torneo terminato")
+
+if __name__ == "__main__":
+    #single match
+    list_superplayers = load_superplayers_from_file(CONFIG["single_match_superplayers"])
+    if len(list_superplayers) != 2:
+        log.error("Puoi fare il match singolo solo fra due superplayer")
+        exit(1)
+    else:
+        CONFIG["server"]["parameters"] = ["-g","-t", "2000"]
+        CONFIG["server"]["log_file"] = 'server_single_match.logs'
+        CONFIG["client"]["timeout"] = 10
+        CONFIG["single_match"] = True
+        clear_old_results_csv(CONFIG["single_match_result_file"])
+        sp1 = list_superplayers[0]
+        sp2 = list_superplayers[1]
+        sp1['playerW']['name'] += '_sm'
+        sp1['playerB']['name'] += '_sm'
+        sp2['playerW']['name'] += '_sm'
+        sp2['playerB']['name'] += '_sm'
+        log.info(f"Match tra {sp1['superPlayerName']} e {sp2['superPlayerName']}")
+        match_bw_superplayers(sp1,sp2)
+        store_match_results(sp1,sp2)
