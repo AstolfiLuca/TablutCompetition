@@ -162,14 +162,15 @@
     <target name="check-java-version">
         <echo message="Checking Java Version..."/>
 
-        <condition property="isJava8">
-            <equals arg1="${ant.java.version}" arg2="1.8"/>
-        </condition>
+        <fail message="ERROR: Java 17 or higher is required. Currently running: ${ant.java.version}">
+            <condition>
+                <not>
+                    <javaversion atleast="17"/>
+                </not>
+            </condition>
+        </fail>
 
-        <fail message="ERROR: You must launch this build with Java 8 (1.8). Used instead: ${java.version}"
-              unless="isJava8"/>
-
-        <echo message="Java 1.8 confirmed."/>
+        <echo message="Java 17+ confirmed."/>
     </target>
 
     <!--Queste properties possono essere sovrascritte dal lancio di ant da riga di comando-->
