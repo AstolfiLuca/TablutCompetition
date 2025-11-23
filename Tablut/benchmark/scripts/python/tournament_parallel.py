@@ -137,7 +137,8 @@ def run_client(player, port):
         CONFIG["client"]["server_ip"], 
         player["name"], 
         json.dumps(player["heuristics"]),
-        str(port)
+        str(port),
+        str(CONFIG["client"]["activate_verbose_heuristics_logs"])
     ]
 
     vmessage(f"Avvio del client {player['name']} con timeout {CONFIG['client']['timeout']} secondi... Log su: {log_file_path}", debug=True)

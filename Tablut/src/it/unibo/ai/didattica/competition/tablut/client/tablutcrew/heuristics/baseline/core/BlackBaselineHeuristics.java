@@ -4,6 +4,7 @@ import it.unibo.ai.didattica.competition.tablut.client.tablutcrew.heuristics.bas
 import it.unibo.ai.didattica.competition.tablut.client.tablutcrew.heuristics.baseline.utils.HeuristicRegistry;
 import it.unibo.ai.didattica.competition.tablut.client.tablutcrew.heuristics.baseline.weights.BlackWeights;
 import it.unibo.ai.didattica.competition.tablut.domain.State;
+import it.unibo.ai.didattica.competition.tablut.util.Configuration;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -83,7 +84,12 @@ public class BlackBaselineHeuristics extends Heuristic {
                     Heuristic heuristic = HeuristicRegistry.createBlackHeuristic(key, boardState, currentPlayer);
 
                     // Evaluate the heuristic
-                    double heuristicValue =  heuristic.logAndEvaluate(state);
+                    double heuristicValue;
+                    if (Configuration.debug){
+                        heuristicValue =  heuristic.logAndEvaluate(state);
+                    }else {
+                        heuristicValue =  heuristic.evaluateState(state);
+                    }
 
                     // Add weighted contribution to total score
                     totalScore += weight * heuristicValue;
@@ -96,9 +102,12 @@ public class BlackBaselineHeuristics extends Heuristic {
                 System.err.println("Warning: No heuristic implementation registered for key '" + key + "' - skipping");
             }
         }
-        System.out.println("Total Score for this state");
-        System.out.println(this.toJson(state));
-        System.out.println(totalScore);
+        if (Configuration.debug){
+            System.out.println("Total Score for this state");
+            System.out.println(this.toJson(state));
+            System.out.println(totalScore);
+        }
+
         return totalScore;
     }
 

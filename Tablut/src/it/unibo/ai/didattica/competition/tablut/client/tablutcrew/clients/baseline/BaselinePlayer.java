@@ -85,8 +85,16 @@ public class BaselinePlayer extends TablutHeuristicClient {
                 System.exit(-1);
             }
         }
+        if (args.length > 6){
+            try{
+                Configuration.debug = Boolean.parseBoolean(args[6]);
+            }catch (Exception e){
+                System.out.println(e.getMessage());
+                System.out.println("L'ultimo argomento dev'essere un booleano per il debug. Inizializzato a false");
+            }
+        }
         System.out.println("Selected client: " + args[0]);
-
+        System.out.println("Debug is set to " + Configuration.debug);
         BaselinePlayer client = new BaselinePlayer(role, name, timeout, ipAddress, weights, port);
         client.run();
     }
