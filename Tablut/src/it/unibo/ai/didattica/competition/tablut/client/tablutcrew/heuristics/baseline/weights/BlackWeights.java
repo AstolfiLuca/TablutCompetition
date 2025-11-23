@@ -24,17 +24,17 @@ public class BlackWeights {
     public static final String RHOMBUS_SCORE_WEIGHT = "RHOMBUS_SCORE_WEIGHT";
 
     // Default values
-    public static final double DEFAULT_KING_THREAT_WEIGHT = 5.0;
-    public static final double DEFAULT_KING_SAFETY_WEIGHT = 1.0;
-    public static final double DEFAULT_KING_INCHECK_WEIGHT = 5.0;
-    public static final double DEFAULT_MANHATTAN_TOKING_WEIGHT = 5.0;
-    public static final double DEFAULT_MANHATTAN_TOESCAPES_WEIGHT = 5.0;
-    public static final double DEFAULT_LINE_SCORE_WEIGHT = 5.0;
-    public static final double DEFAULT_PAWNS_SAFETY_WEIGHT = 5.0;
-    public static final double DEFAULT_PAWNS_THREAT_SCORE_WEIGHT = 5.0;
-    public static final double DEFAULT_DEFENSIVE_POSITION_WEIGHT = 5.0;
-    public static final double DEFAULT_RHOMBUS_SCORE_WEIGHT = 3.0;
-    public static final double DEFAULT_PIECES_SCORE_WEIGHT = 50.0;
+    public static final double DEFAULT_KING_THREAT_WEIGHT = 4.0;
+    public static final double DEFAULT_KING_SAFETY_WEIGHT = 4.0;
+    public static final double DEFAULT_KING_INCHECK_WEIGHT = 3.0;
+    public static final double DEFAULT_MANHATTAN_TOKING_WEIGHT = 14.0;
+    public static final double DEFAULT_MANHATTAN_TOESCAPES_WEIGHT = 0.0;
+    public static final double DEFAULT_LINE_SCORE_WEIGHT = 7.0;
+    public static final double DEFAULT_PAWNS_SAFETY_WEIGHT = 10.0;
+    public static final double DEFAULT_PAWNS_THREAT_SCORE_WEIGHT = 7.0;
+    public static final double DEFAULT_DEFENSIVE_POSITION_WEIGHT = 0.0;
+    public static final double DEFAULT_RHOMBUS_SCORE_WEIGHT = 14.0;
+    public static final double DEFAULT_PIECES_SCORE_WEIGHT = 78.0;
 
     // Private constructor to prevent instantiation
     private BlackWeights() {
