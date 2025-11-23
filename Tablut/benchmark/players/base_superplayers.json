@@ -1,496 +1,79 @@
 [
   {
-    "superPlayerName": "SP55",
+    "superPlayerName": "SP1",
     "playerW": {
-      "name": "SP55_White",
+      "name": "BaselineWhiteSP1",
       "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.baseline.BaselinePlayer",
       "role": "WHITE",
-      "heuristics": {
-        "KING_THREAT_WEIGHT": 0.0,
-        "KING_SAFETY_WEIGHT": 3.0,
-        "KING_INCHECK_WEIGHT": 5.0,
-        "MANHATTAN_TOKING_WEIGHT": 0.0,
-        "MANHATTAN_TOESCAPES_WEIGHT": 13.0,
-        "LINE_SCORE_WEIGHT": 11.0,
-        "PAWNS_SAFETY_WEIGHT": 4.0,
-        "PAWNS_THREAT_SCORE_WEIGHT": 14.0,
-        "PIECES_SCORE_WEIGHT": 89.0,
-        "DEFENSIVE_POSITION_WEIGHT": 0.0,
-        "RHOMBUS_SCORE_WEIGHT": 0.0
-      }
-    },
-    "playerB": {
-      "name": "SP55_Black",
-      "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.baseline.BaselinePlayer",
-      "role": "BLACK",
-      "heuristics": {
-        "KING_THREAT_WEIGHT": 4.0,
-        "KING_SAFETY_WEIGHT": 4.0,
-        "KING_INCHECK_WEIGHT": 3.0,
-        "MANHATTAN_TOKING_WEIGHT": 14.0,
-        "MANHATTAN_TOESCAPES_WEIGHT": 0.0,
-        "LINE_SCORE_WEIGHT": 7.0,
-        "PAWNS_SAFETY_WEIGHT": 10.0,
-        "PAWNS_THREAT_SCORE_WEIGHT": 7.0,
-        "PIECES_SCORE_WEIGHT": 78.0,
-        "DEFENSIVE_POSITION_WEIGHT": 0.0,
-        "RHOMBUS_SCORE_WEIGHT": 14.0
-      }
-    }
-  },
-  {
-    "superPlayerName": "SP33",
-    "playerW": {
-      "name": "SP33_White",
-      "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.baseline.BaselinePlayer",
-      "role": "WHITE",
-      "heuristics": {
-        "KING_THREAT_WEIGHT": 0.0,
-        "KING_SAFETY_WEIGHT": 3.0,
-        "KING_INCHECK_WEIGHT": 5.0,
-        "MANHATTAN_TOKING_WEIGHT": 0.0,
-        "MANHATTAN_TOESCAPES_WEIGHT": 12.0,
-        "LINE_SCORE_WEIGHT": 12.0,
-        "PAWNS_SAFETY_WEIGHT": 4.0,
-        "PAWNS_THREAT_SCORE_WEIGHT": 16.0,
-        "PIECES_SCORE_WEIGHT": 83.0,
-        "DEFENSIVE_POSITION_WEIGHT": 0.0,
-        "RHOMBUS_SCORE_WEIGHT": 0.0
-      }
-    },
-    "playerB": {
-      "name": "SP33_Black",
-      "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.baseline.BaselinePlayer",
-      "role": "BLACK",
-      "heuristics": {
-        "KING_THREAT_WEIGHT": 4.0,
-        "KING_SAFETY_WEIGHT": 4.0,
-        "KING_INCHECK_WEIGHT": 3.0,
-        "MANHATTAN_TOKING_WEIGHT": 14.0,
-        "MANHATTAN_TOESCAPES_WEIGHT": 0.0,
-        "LINE_SCORE_WEIGHT": 7.0,
-        "PAWNS_SAFETY_WEIGHT": 10.0,
-        "PAWNS_THREAT_SCORE_WEIGHT": 7.0,
-        "PIECES_SCORE_WEIGHT": 83.0,
-        "DEFENSIVE_POSITION_WEIGHT": 0.0,
-        "RHOMBUS_SCORE_WEIGHT": 14.0
-      }
-    }
-  },
-  {
-    "superPlayerName": "SP161",
-    "playerW": {
-      "name": "SP161_White",
-      "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.baseline.BaselinePlayer",
-      "role": "WHITE",
-      "heuristics": {
+      "heuristics":{
         "KING_THREAT_WEIGHT": 0.0,
         "KING_SAFETY_WEIGHT": 0.0,
-        "KING_INCHECK_WEIGHT": 3.0,
+        "KING_INCHECK_WEIGHT": 5.0,
         "MANHATTAN_TOKING_WEIGHT": 0.0,
-        "MANHATTAN_TOESCAPES_WEIGHT": 4.0,
-        "LINE_SCORE_WEIGHT": 7.0,
-        "PAWNS_SAFETY_WEIGHT": 5.0,
-        "PAWNS_THREAT_SCORE_WEIGHT": 2.0,
-        "PIECES_SCORE_WEIGHT": 34.0,
-        "DEFENSIVE_POSITION_WEIGHT": 0.0,
-        "RHOMBUS_SCORE_WEIGHT": 0.0
-      }
-    },
-    "playerB": {
-      "name": "SP161_Black",
-      "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.baseline.BaselinePlayer",
-      "role": "BLACK",
-      "heuristics": {
-        "KING_THREAT_WEIGHT": 4.0,
-        "KING_SAFETY_WEIGHT": 11.0,
-        "KING_INCHECK_WEIGHT": 2.0,
-        "MANHATTAN_TOKING_WEIGHT": 4.0,
-        "MANHATTAN_TOESCAPES_WEIGHT": 0.0,
-        "LINE_SCORE_WEIGHT": 6.0,
-        "PAWNS_SAFETY_WEIGHT": 5.0,
-        "PAWNS_THREAT_SCORE_WEIGHT": 2.0,
-        "PIECES_SCORE_WEIGHT": 9.0,
-        "DEFENSIVE_POSITION_WEIGHT": 0.0,
-        "RHOMBUS_SCORE_WEIGHT": 10.0
-      }
-    }
-  },
-  {
-    "superPlayerName": "SP126",
-    "playerW": {
-      "name": "SP126_White",
-      "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.baseline.BaselinePlayer",
-      "role": "WHITE",
-      "heuristics": {
-        "KING_THREAT_WEIGHT": 0.0,
-        "KING_SAFETY_WEIGHT": 0.0,
-        "KING_INCHECK_WEIGHT": 7.0,
-        "MANHATTAN_TOKING_WEIGHT": 0.0,
-        "MANHATTAN_TOESCAPES_WEIGHT": 3.0,
-        "LINE_SCORE_WEIGHT": 15.0,
+        "MANHATTAN_TOESCAPES_WEIGHT": 6.0,
+        "LINE_SCORE_WEIGHT": 35.0,
         "PAWNS_SAFETY_WEIGHT": 4.0,
-        "PAWNS_THREAT_SCORE_WEIGHT": 2.0,
-        "PIECES_SCORE_WEIGHT": 51.0,
-        "DEFENSIVE_POSITION_WEIGHT": 0.0,
-        "RHOMBUS_SCORE_WEIGHT": 0.0
-      }
-    },
-    "playerB": {
-      "name": "SP126_Black",
-      "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.baseline.BaselinePlayer",
-      "role": "BLACK",
-      "heuristics": {
-        "KING_THREAT_WEIGHT": 4.0,
-        "KING_SAFETY_WEIGHT": 15.0,
-        "KING_INCHECK_WEIGHT": 2.0,
-        "MANHATTAN_TOKING_WEIGHT": 3.0,
-        "MANHATTAN_TOESCAPES_WEIGHT": 0.0,
-        "LINE_SCORE_WEIGHT": 12.0,
-        "PAWNS_SAFETY_WEIGHT": 0.0,
-        "PAWNS_THREAT_SCORE_WEIGHT": 2.0,
-        "PIECES_SCORE_WEIGHT": 43.0,
-        "DEFENSIVE_POSITION_WEIGHT": 0.0,
-        "RHOMBUS_SCORE_WEIGHT": 3.0
-      }
-    }
-  },
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  {
-    "superPlayerName": "SP86",
-    "playerW": {
-      "name": "SP86_White",
-      "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.baseline.BaselinePlayer",
-      "role": "WHITE",
-      "heuristics": {
-        "KING_THREAT_WEIGHT": 8.0,
-        "KING_SAFETY_WEIGHT": 2.0,
-        "KING_INCHECK_WEIGHT": 3.0,
-        "MANHATTAN_TOKING_WEIGHT": 0.0,
-        "MANHATTAN_TOESCAPES_WEIGHT": 4.0,
-        "LINE_SCORE_WEIGHT": 10.0,
-        "PAWNS_SAFETY_WEIGHT": 2.0,
-        "PAWNS_THREAT_SCORE_WEIGHT": 3.0,
-        "PIECES_SCORE_WEIGHT": 87.0,
-        "DEFENSIVE_POSITION_WEIGHT": 0.0,
-        "RHOMBUS_SCORE_WEIGHT": 0.0
-      }
-    },
-    "playerB": {
-      "name": "SP86_Black",
-      "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.baseline.BaselinePlayer",
-      "role": "BLACK",
-      "heuristics": {
-        "KING_THREAT_WEIGHT": 4.0,
-        "KING_SAFETY_WEIGHT": 6.0,
-        "KING_INCHECK_WEIGHT": 2.0,
-        "MANHATTAN_TOKING_WEIGHT": 19.0,
-        "MANHATTAN_TOESCAPES_WEIGHT": 0.0,
-        "LINE_SCORE_WEIGHT": 9.0,
-        "PAWNS_SAFETY_WEIGHT": 6.0,
-        "PAWNS_THREAT_SCORE_WEIGHT": 2.0,
+        "PAWNS_THREAT_SCORE_WEIGHT": 5.0,
         "PIECES_SCORE_WEIGHT": 64.0,
-        "DEFENSIVE_POSITION_WEIGHT": 2.0,
-        "RHOMBUS_SCORE_WEIGHT": 3.0
-      }
-    }
-  },
-  {
-    "superPlayerName": "SP104",
-    "playerW": {
-      "name": "SP104_White",
-      "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.baseline.BaselinePlayer",
-      "role": "WHITE",
-      "heuristics": {
-        "KING_THREAT_WEIGHT": 8.0,
-        "KING_SAFETY_WEIGHT": 2.0,
-        "KING_INCHECK_WEIGHT": 3.0,
-        "MANHATTAN_TOKING_WEIGHT": 0.0,
-        "MANHATTAN_TOESCAPES_WEIGHT": 4.0,
-        "LINE_SCORE_WEIGHT": 10.0,
-        "PAWNS_SAFETY_WEIGHT": 2.0,
-        "PAWNS_THREAT_SCORE_WEIGHT": 3.0,
-        "PIECES_SCORE_WEIGHT": 86.0,
         "DEFENSIVE_POSITION_WEIGHT": 0.0,
         "RHOMBUS_SCORE_WEIGHT": 0.0
-      }
+        }
     },
     "playerB": {
-      "name": "SP104_Black",
+      "name": "BaselineBlackSP1",
       "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.baseline.BaselinePlayer",
       "role": "BLACK",
-      "heuristics": {
-        "KING_THREAT_WEIGHT": 4.0,
-        "KING_SAFETY_WEIGHT": 6.0,
+      "heuristics":{
+        "KING_THREAT_WEIGHT": 3.0,
+        "KING_SAFETY_WEIGHT": 8.0,
         "KING_INCHECK_WEIGHT": 2.0,
-        "MANHATTAN_TOKING_WEIGHT": 19.0,
+        "MANHATTAN_TOKING_WEIGHT": 12.0,
         "MANHATTAN_TOESCAPES_WEIGHT": 0.0,
-        "LINE_SCORE_WEIGHT": 9.0,
-        "PAWNS_SAFETY_WEIGHT": 6.0,
-        "PAWNS_THREAT_SCORE_WEIGHT": 2.0,
-        "PIECES_SCORE_WEIGHT": 64.0,
-        "DEFENSIVE_POSITION_WEIGHT": 2.0,
-        "RHOMBUS_SCORE_WEIGHT": 3.0
+        "LINE_SCORE_WEIGHT": 4.0,
+        "PAWNS_SAFETY_WEIGHT": 4.0,
+        "PAWNS_THREAT_SCORE_WEIGHT": 4.0,
+        "PIECES_SCORE_WEIGHT": 69.0,
+        "DEFENSIVE_POSITION_WEIGHT": 0.0,
+        "RHOMBUS_SCORE_WEIGHT": 5.0
       }
     }
   },
   {
-    "superPlayerName": "SP55_1",
+    "superPlayerName": "SP2",
     "playerW": {
-      "name": "SP55_White",
+      "name": "BaselineWhiteSP2",
       "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.baseline.BaselinePlayer",
       "role": "WHITE",
-      "heuristics": {
-        "KING_THREAT_WEIGHT": 24.0,
-        "KING_SAFETY_WEIGHT": 1.0,
-        "KING_INCHECK_WEIGHT": 8.0,
-        "MANHATTAN_TOKING_WEIGHT": 0.0,
-        "MANHATTAN_TOESCAPES_WEIGHT": 3.0,
-        "LINE_SCORE_WEIGHT": 2.0,
-        "PAWNS_SAFETY_WEIGHT": 3.0,
-        "PAWNS_THREAT_SCORE_WEIGHT": 2.0,
-        "PIECES_SCORE_WEIGHT": 92.0,
-        "DEFENSIVE_POSITION_WEIGHT": 0.0,
-        "RHOMBUS_SCORE_WEIGHT": 0.0
-      }
-    },
-    "playerB": {
-      "name": "SP55_Black",
-      "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.baseline.BaselinePlayer",
-      "role": "BLACK",
-      "heuristics": {
-        "KING_THREAT_WEIGHT": 4.0,
-        "KING_SAFETY_WEIGHT": 1.0,
-        "KING_INCHECK_WEIGHT": 1.0,
-        "MANHATTAN_TOKING_WEIGHT": 10.0,
-        "MANHATTAN_TOESCAPES_WEIGHT": 0.0,
-        "LINE_SCORE_WEIGHT": 2.0,
-        "PAWNS_SAFETY_WEIGHT": 2.0,
-        "PAWNS_THREAT_SCORE_WEIGHT": 1.0,
-        "PIECES_SCORE_WEIGHT": 25.0,
-        "DEFENSIVE_POSITION_WEIGHT": 0.0,
-        "RHOMBUS_SCORE_WEIGHT": 16.0
-      }
-    }
-  },
-  {
-    "superPlayerName": "SP15",
-    "playerW": {
-      "name": "SP15_White",
-      "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.baseline.BaselinePlayer",
-      "role": "WHITE",
-      "heuristics": {
-        "KING_THREAT_WEIGHT": 18.0,
-        "KING_SAFETY_WEIGHT": 1.0,
+      "heuristics":{
+        "KING_THREAT_WEIGHT": 7.0,
+        "KING_SAFETY_WEIGHT": 5.0,
         "KING_INCHECK_WEIGHT": 5.0,
         "MANHATTAN_TOKING_WEIGHT": 0.0,
         "MANHATTAN_TOESCAPES_WEIGHT": 3.0,
-        "LINE_SCORE_WEIGHT": 2.0,
-        "PAWNS_SAFETY_WEIGHT": 3.0,
-        "PAWNS_THREAT_SCORE_WEIGHT": 2.0,
-        "PIECES_SCORE_WEIGHT": 111.0,
+        "LINE_SCORE_WEIGHT": 23.0,
+        "PAWNS_SAFETY_WEIGHT": 4.0,
+        "PAWNS_THREAT_SCORE_WEIGHT": 6.0,
+        "PIECES_SCORE_WEIGHT": 33.0,
         "DEFENSIVE_POSITION_WEIGHT": 0.0,
         "RHOMBUS_SCORE_WEIGHT": 0.0
       }
     },
     "playerB": {
-      "name": "SP15_Black",
+      "name": "BaselineBlackSP2",
       "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.baseline.BaselinePlayer",
       "role": "BLACK",
-      "heuristics": {
-        "KING_THREAT_WEIGHT": 5.0,
-        "KING_SAFETY_WEIGHT": 1.0,
-        "KING_INCHECK_WEIGHT": 1.0,
-        "MANHATTAN_TOKING_WEIGHT": 13.0,
-        "MANHATTAN_TOESCAPES_WEIGHT": 0.0,
-        "LINE_SCORE_WEIGHT": 2.0,
-        "PAWNS_SAFETY_WEIGHT": 2.0,
-        "PAWNS_THREAT_SCORE_WEIGHT": 1.0,
-        "PIECES_SCORE_WEIGHT": 25.0,
-        "DEFENSIVE_POSITION_WEIGHT": 0.0,
-        "RHOMBUS_SCORE_WEIGHT": 17.0
-      }
-    }
-  },
-
-
-
-
-
-
-
-
-
-
-
-
-
-  {
-    "superPlayerName": "SP70",
-    "playerW": {
-      "name": "SP70_White",
-      "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.baseline.BaselinePlayer",
-      "role": "WHITE",
-      "heuristics": {
-        "KING_THREAT_WEIGHT": 22.0,
-        "KING_SAFETY_WEIGHT": 1.0,
-        "KING_INCHECK_WEIGHT": 6.0,
-        "MANHATTAN_TOKING_WEIGHT": 0.0,
-        "MANHATTAN_TOESCAPES_WEIGHT": 3.0,
-        "LINE_SCORE_WEIGHT": 2.0,
-        "PAWNS_SAFETY_WEIGHT": 3.0,
-        "PAWNS_THREAT_SCORE_WEIGHT": 2.0,
-        "PIECES_SCORE_WEIGHT": 101.0,
-        "DEFENSIVE_POSITION_WEIGHT": 0.0,
-        "RHOMBUS_SCORE_WEIGHT": 0.0
-      }
-    },
-    "playerB": {
-      "name": "SP70_Black",
-      "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.baseline.BaselinePlayer",
-      "role": "BLACK",
-      "heuristics": {
-        "KING_THREAT_WEIGHT": 0.0,
-        "KING_SAFETY_WEIGHT": 1.0,
-        "KING_INCHECK_WEIGHT": 1.0,
-        "MANHATTAN_TOKING_WEIGHT": 11.0,
-        "MANHATTAN_TOESCAPES_WEIGHT": 0.0,
-        "LINE_SCORE_WEIGHT": 2.0,
-        "PAWNS_SAFETY_WEIGHT": 2.0,
-        "PAWNS_THREAT_SCORE_WEIGHT": 7.0,
-        "PIECES_SCORE_WEIGHT": 26.0,
-        "DEFENSIVE_POSITION_WEIGHT": 0.0,
-        "RHOMBUS_SCORE_WEIGHT": 16.0
-      }
-    }
-  },
-  {
-    "superPlayerName": "SP80",
-    "playerW": {
-      "name": "SP80_White",
-      "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.baseline.BaselinePlayer",
-      "role": "WHITE",
-      "heuristics": {
-        "KING_THREAT_WEIGHT": 22.0,
-        "KING_SAFETY_WEIGHT": 1.0,
-        "KING_INCHECK_WEIGHT": 6.0,
-        "MANHATTAN_TOKING_WEIGHT": 0.0,
-        "MANHATTAN_TOESCAPES_WEIGHT": 3.0,
-        "LINE_SCORE_WEIGHT": 2.0,
-        "PAWNS_SAFETY_WEIGHT": 3.0,
-        "PAWNS_THREAT_SCORE_WEIGHT": 2.0,
-        "PIECES_SCORE_WEIGHT": 94.0,
-        "DEFENSIVE_POSITION_WEIGHT": 0.0,
-        "RHOMBUS_SCORE_WEIGHT": 0.0
-      }
-    },
-    "playerB": {
-      "name": "SP80_Black",
-      "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.baseline.BaselinePlayer",
-      "role": "BLACK",
-      "heuristics": {
-        "KING_THREAT_WEIGHT": 0.0,
-        "KING_SAFETY_WEIGHT": 1.0,
-        "KING_INCHECK_WEIGHT": 1.0,
+      "heuristics":{
+        "KING_THREAT_WEIGHT": 6.0,
+        "KING_SAFETY_WEIGHT": 4.0,
+        "KING_INCHECK_WEIGHT": 2.0,
         "MANHATTAN_TOKING_WEIGHT": 16.0,
         "MANHATTAN_TOESCAPES_WEIGHT": 0.0,
         "LINE_SCORE_WEIGHT": 10.0,
-        "PAWNS_SAFETY_WEIGHT": 3.0,
-        "PAWNS_THREAT_SCORE_WEIGHT": 2.0,
-        "PIECES_SCORE_WEIGHT": 25.0,
-        "DEFENSIVE_POSITION_WEIGHT": 0.0,
-        "RHOMBUS_SCORE_WEIGHT": 17.0
-      }
-    }
-  },
-  {
-    "superPlayerName": "SP37",
-    "playerW": {
-      "name": "SP37_White",
-      "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.baseline.BaselinePlayer",
-      "role": "WHITE",
-      "heuristics": {
-        "KING_THREAT_WEIGHT": 20.0,
-        "KING_SAFETY_WEIGHT": 1.0,
-        "KING_INCHECK_WEIGHT": 7.0,
-        "MANHATTAN_TOKING_WEIGHT": 0.0,
-        "MANHATTAN_TOESCAPES_WEIGHT": 3.0,
-        "LINE_SCORE_WEIGHT": 2.0,
-        "PAWNS_SAFETY_WEIGHT": 3.0,
-        "PAWNS_THREAT_SCORE_WEIGHT": 2.0,
-        "PIECES_SCORE_WEIGHT": 109.0,
-        "DEFENSIVE_POSITION_WEIGHT": 0.0,
-        "RHOMBUS_SCORE_WEIGHT": 0.0
-      }
-    },
-    "playerB": {
-      "name": "SP37_Black",
-      "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.baseline.BaselinePlayer",
-      "role": "BLACK",
-      "heuristics": {
-        "KING_THREAT_WEIGHT": 4.0,
-        "KING_SAFETY_WEIGHT": 1.0,
-        "KING_INCHECK_WEIGHT": 1.0,
-        "MANHATTAN_TOKING_WEIGHT": 15.0,
-        "MANHATTAN_TOESCAPES_WEIGHT": 0.0,
-        "LINE_SCORE_WEIGHT": 2.0,
-        "PAWNS_SAFETY_WEIGHT": 2.0,
-        "PAWNS_THREAT_SCORE_WEIGHT": 1.0,
-        "PIECES_SCORE_WEIGHT": 21.0,
-        "DEFENSIVE_POSITION_WEIGHT": 0.0,
-        "RHOMBUS_SCORE_WEIGHT": 17.0
-      }
-    }
-  },
-  {
-    "superPlayerName": "SP_SGRAVATO_DE_ROMA_CENTRO",
-    "playerW": {
-      "name": "SP55_White",
-      "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.baseline.BaselinePlayer",
-      "role": "WHITE",
-      "heuristics": {
-        "KING_THREAT_WEIGHT": 24.0,
-        "KING_SAFETY_WEIGHT": 1.0,
-        "KING_INCHECK_WEIGHT": 8.0,
-        "MANHATTAN_TOKING_WEIGHT": 0.0,
-        "MANHATTAN_TOESCAPES_WEIGHT": 3.0,
-        "LINE_SCORE_WEIGHT": 2.0,
-        "PAWNS_SAFETY_WEIGHT": 3.0,
-        "PAWNS_THREAT_SCORE_WEIGHT": 2.0,
-        "PIECES_SCORE_WEIGHT": 92.0,
-        "DEFENSIVE_POSITION_WEIGHT": 0.0,
-        "RHOMBUS_SCORE_WEIGHT": 0.0
-      }
-    },
-    "playerB": {
-      "name": "SP55_Black",
-      "clientName": "it.unibo.ai.didattica.competition.tablut.client.tablutcrew.clients.baseline.BaselinePlayer",
-      "role": "BLACK",
-      "heuristics": {
-        "KING_THREAT_WEIGHT": 4.0,
-        "KING_SAFETY_WEIGHT": 1.0,
-        "KING_INCHECK_WEIGHT": 1.0,
-        "MANHATTAN_TOKING_WEIGHT": 10.0,
-        "MANHATTAN_TOESCAPES_WEIGHT": 0.0,
-        "LINE_SCORE_WEIGHT": 2.0,
-        "PAWNS_SAFETY_WEIGHT": 2.0,
-        "PAWNS_THREAT_SCORE_WEIGHT": 1.0,
-        "PIECES_SCORE_WEIGHT": 25.0,
-        "DEFENSIVE_POSITION_WEIGHT": 0.0,
-        "RHOMBUS_SCORE_WEIGHT": 16.0
+        "PAWNS_SAFETY_WEIGHT": 5.0,
+        "PAWNS_THREAT_SCORE_WEIGHT": 5.0,
+        "PIECES_SCORE_WEIGHT": 81.0,
+        "DEFENSIVE_POSITION_WEIGHT": 3.0,
+        "RHOMBUS_SCORE_WEIGHT": 9.0
       }
     }
   }
