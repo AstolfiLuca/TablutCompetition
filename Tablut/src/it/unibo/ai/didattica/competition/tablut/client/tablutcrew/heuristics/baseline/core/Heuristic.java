@@ -1,17 +1,30 @@
 package it.unibo.ai.didattica.competition.tablut.client.tablutcrew.heuristics.baseline.core;
 
+import com.google.gson.Gson;
 import it.unibo.ai.didattica.competition.tablut.client.tablutcrew.heuristics.baseline.utils.BaselineHeuristicsUtils;
 import it.unibo.ai.didattica.competition.tablut.domain.State;
 
 public abstract class Heuristic {
     public BaselineHeuristicsUtils.BoardState boardState;
     public State.Turn currentPlayer;
+    private final Gson gson = new Gson();
 
     public Heuristic(BaselineHeuristicsUtils.BoardState boardState, State.Turn currentPlayer) {
         this.boardState = boardState;
         this.currentPlayer = currentPlayer;
     }
 
+    public String toJson(State state){
+        return gson.toJson(state);
+    }
+
+    public double logAndEvaluate(State state){
+        System.out.println("Sto valutando l'euristica " + this.getClass().getSimpleName() + " per il seguente stato:");
+        System.out.println(gson.toJson(state));
+        double value = this.evaluateState(state);
+        System.out.println("Valutazione: " + value);
+        return value;
+    }
     public abstract double evaluateState(State state);
 
     /**
