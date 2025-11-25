@@ -26,6 +26,9 @@ public class BaselinePlayer extends TablutHeuristicClient {
 
     public BaselinePlayer(String player, String name, int timeout, String ipAddress, String weights, int port) throws UnknownHostException, IOException {
         super(player, name, timeout, ipAddress, weights, port);
+        if (timeout > 2) {
+            timeout = timeout - 2;
+        }
         GameAshtonTablut game = new GameAshtonTablut(REPEATED_MOVES_ALLOWED, CACHED_MOVES_ALLOWED, LOGS_FOLDER, "White", "Black");
         this.searchStrategy = new BaselineSearch(game, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, timeout, this.weights);
     }

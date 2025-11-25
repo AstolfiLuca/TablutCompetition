@@ -15,6 +15,7 @@ public class BaselineSearch extends IterativeDeepeningAlphaBetaSearch<State, Act
 
     public BaselineSearch(Game<State, Action, State.Turn> game, double utilMin, double utilMax, int time, Map<String, Double> weights) {
         super(game, utilMin, utilMax, time);
+        System.out.println("Initializing search with a timeout of " + time);
         this.weights = weights;
     }
 
